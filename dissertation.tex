@@ -1,0 +1,73 @@
+\documentclass[12pt, proquest, natbib]{uwthesis}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath, amssymb, amsthm}
+
+%%% FONTS
+\usepackage[charter]{mathdesign}
+\usepackage{berasans}
+\usepackage{beramono}
+\usepackage{bm}
+
+%%% GRAPHICS
+\usepackage{graphicx}
+\usepackage[usenames, dvipsnames]{xcolor}
+
+%%% UTILITIES
+\usepackage{etoolbox}
+\usepackage{xspace}
+\usepackage{hyphenat}
+\usepackage{booktabs}
+\usepackage{cleveref}
+
+%%% OPTIONS
+% Whether to color hyperlinks in the PDF
+\newtoggle{colorlinks}
+\toggletrue{colorlinks}
+
+%%% HYPERLINKS
+\usepackage{hyperref}
+\hypersetup{
+    breaklinks = false,
+    colorlinks = true,
+    pdfauthor = {Oleksandr Polozov},
+}
+\iftoggle{colorlinks}{%
+    \hypersetup{
+        citecolor = darkgreen,
+        linkcolor = MidnightBlue,
+        menucolor = black,
+        urlcolor = MidnightBlue,
+    }
+}{%
+    \hypersetup{
+        citecolor = black,
+        linkcolor = black,
+        menucolor = black,
+        urlcolor = black,
+    }
+}
+
+\begin{document}
+
+%%% PRELIMINARY PAGES
+\prelimpages
+\include{title}
+\include{abstract}
+\tableofcontents
+\listoffigures
+\listoftables
+\include{acks}
+
+%%% CONTENT
+\textpages
+
+%%% BIBLIOGRAPHY
+\bibliographystyle{plain}
+\bibliography{dissertation}
+
+%%% APPENDICES
+\appendix
+
+\end{document}
