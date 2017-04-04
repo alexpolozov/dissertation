@@ -1,3 +1,28 @@
 \abstract{
-    Foo
+    Programming by examples (PBE), or inductive program synthesis, is a problem of finding a program in the underlying
+    domain-specific language (DSL) that is consistent with the given input-output examples or constraints.
+    In the last decade, it has gained a lot of prominence thanks to the mass-market deployments of several PBE-based
+    technologies for data wrangling -- the widespread problem of transforming raw datasets into a structured form, more
+    amenable to analysis.
+    However, deployment of a mass-market application of program synthesis is challenging.
+    First, an efficient implementation requires non-trivial engineering insight, often overlooked in a research
+    prototype.
+    This insight takes the form of domain-specific knowledge and heuristics, which complicate the implementation,
+    extensibility, and maintenance of the underlying synthesis algorithm.
+    Second, application development should be fast and agile, tailoring to versatile market requirements.
+    Third, the underlying synthesis algorithm should be accessible to the engineers responsible for product maintenance.
+    \par
+    In this work, I show how to generalize the ideas of 10+ previous specialized inductive synthesizers into a single
+    framework, which facilitates automatic generation of a domain-specific synthesizer from the mere definition of the
+    corresponding DSL and its properties.
+    It is the first program synthesis framework that explicitly separates domain-agnostic search algorithms from
+    domain-specific expert insight, making the resulting synthesizer both fast and accessible.
+    The underlying synthesis algorithm pioneers the use of deductive reasoning for designer-defined domain-specific
+    operators and languages, which features mean synthesis times of 1-3 sec on real-life datasets.
+    \par
+    In addition, I study the user interaction challenges that arise after a mass-market deployment of a PBE-powered
+    application, using 10+ technologies built and deployed by Microsoft on top of the developed synthesis framework as
+    case studies.
+    I show how expressing program synthesis as an interactive problem facilitates user intent disambiguation,
+    incremental learning from additional examples, and increases the users' confidence in the system.
 }
