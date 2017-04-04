@@ -1,25 +1,78 @@
 \documentclass[12pt, proquest, natbib]{uwthesis}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage{microtype}
 
-\usepackage{amsmath, amssymb, amsthm}
+% MATH
+\usepackage{amsmath, amsthm}
+\usepackage{thmtools}
+\usepackage{mathtools}
+\usepackage{bm}
 
 %%% FONTS
+\usepackage{textcomp}
 \usepackage[charter]{mathdesign}
 \usepackage{berasans}
 \usepackage{beramono}
-\usepackage{bm}
+\usepackage{wasysym}  % \Bowtie
 
 %%% GRAPHICS
 \usepackage{graphicx}
 \usepackage[usenames, dvipsnames]{xcolor}
+\usepackage[hypcap=true]{subcaption}
+
+%%% TYPESETTING
+\usepackage[inline]{enumitem}
+\usepackage{booktabs}
+\usepackage{alltt}
 
 %%% UTILITIES
+\usepackage{adjustbox}
+\usepackage{relsize}
+\usepackage{scalerel}
+\usepackage{twoopt}
 \usepackage{etoolbox}
 \usepackage{xspace}
 \usepackage{hyphenat}
-\usepackage{booktabs}
-\usepackage{cleveref}
+\usepackage[xspace]{ellipsis}
+\usepackage[color=red!55, textsize=footnotesize, textwidth=1.3cm,
+            shadow, prependcaption, obeyFinal, colorinlistoftodos]{todonotes}
+
+%%% ALGORITHMS
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{listings}
+\lstset{
+    basicstyle = \small\ttfamily,
+    stringstyle = \color{Brown},
+    keywordstyle = \bfseries,
+    commentstyle = \itshape\rmfamily,
+    showstringspaces = false,
+    columns = flexible,
+	breaklines = true,
+	texcl = true,
+	mathescape = true,
+    tabsize = 4,
+}
+\lstalias[]{csharp}[Sharp]{C}
+\lstdefinelanguage{dsl}{
+    morekeywords = {language,feature,using,semantics,learners,int,string,@input,@start,values,let,in,@ref,@values,Tuple,@extern,@output,namespace,bool},
+    otherkeywords = {: = ,|,;, = >,:,[,]},
+    sensitive = true,
+    morecomment = [l]{//},
+    morestring = [b]',
+}
+\definecolor{linenum-gray}{HTML}{888888}
+\renewcommand{\algorithmiccomment}[1]{ {\itshape \textsc{//} #1}}
+\newcommand{\NoNumber}{\def\alglinenumber##1{}}
+\newcommand{\WithNumber}{\def\alglinenumber##1{\sf\scriptsize\color{linenum-gray}##1:\hspace{-11pt}}}
+\newcommand{\Functionx}[2]{\NoNumber \Function{#1}{#2} \addtocounter{ALG@line}{-1} \WithNumber}
+\let\oldStatex\Statex
+\renewcommand{\Statex}{\oldStatex \hspace{\algorithmicindent}}
+
+%%% REFERENCES
+\usepackage[capitalize, nameinlink]{cleveref}
+\crefname{defn}{definition}{definitions}
 
 %%% OPTIONS
 % Whether to color hyperlinks in the PDF
@@ -27,12 +80,8 @@
 \toggletrue{colorlinks}
 
 %%% HYPERLINKS
-\usepackage{hyperref}
-\hypersetup{
-    breaklinks = false,
-    colorlinks = true,
-    pdfauthor = {Oleksandr Polozov},
-}
+\usepackage{url}
+\usepackage[breaklinks=true, colorlinks=true, pdfauthor={Oleksandr Polozov}]{hyperref}
 \iftoggle{colorlinks}{%
     \hypersetup{
         citecolor = darkgreen,
@@ -49,15 +98,43 @@
     }
 }
 
+%%% TYPOGRAPHIC SETUP
+\makeatletter
+    % Make \emph{} bold in an italicized environment
+    \DeclareRobustCommand\em
+        {\@nomath\em \ifdim \fontdimen\@ne\font >\z@
+        \bfseries \else \itshape \fi}
+\makeatother
+\frenchspacing
+\clubpenalty = 10000
+\widowpenalty = 10000
+\displaywidowpenalty = 10000
+
+%%% THEOREM-LIKE ENVIRONMENTS
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{defn}{Definition}
+\theoremstyle{definition}
+\newtheorem{example}{Example}
+\newtheorem{problem}{Problem}
+\newtheorem{scenario}{Scenario}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                     BEGIN DOCUMENT                         %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
+\include{macros}
+\listoftodos
 
 %%% PRELIMINARY PAGES
+\hypersetup{pageanchor=false}
 \prelimpages
 \include{title}
 \include{abstract}
 \tableofcontents
 \listoffigures
 \listoftables
+\hypersetup{pageanchor=true}
 \include{acks}
 
 %%% CONTENT
@@ -71,3 +148,4 @@
 \appendix
 
 \end{document}
+

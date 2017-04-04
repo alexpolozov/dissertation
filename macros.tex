@@ -1,0 +1,53 @@
+%%% TEXTUAL VARIABLES
+\newcommand{\PROSE}{\text{PROSE}\xspace}
+\newcommand{\fe}{\text{FlashExtract}\xspace}
+\newcommand{\ff}{\text{FlashFill}\xspace}
+
+%%% NOTATION
+\newcommand{\dsl}{\ensuremath{\mathcal{L}}}
+\newcommand{\state}{\ensuremath{\sigma}}
+\newcommand{\inputSymbol}[1]{\ensuremath{\mathsf{input}(#1)}}
+\newcommand{\start}[1]{\ensuremath{\mathsf{output}(#1)}}
+\newcommand{\rhs}[1]{\ensuremath{\mathsf{RHS}(#1)}}
+\newcommand{\freeVariables}[1]{\ensuremath{\mathsf{FV}(#1)}}
+\newcommand{\spec}{\ensuremath{\varphi}}
+\newcommand{\constraint}{\ensuremath{\psi}}
+\newcommand{\synalgorithm}{\ensuremath{\mathcal{A}}}
+\newcommand{\rank}{\ensuremath{h}}
+\newcommand{\join}{\ensuremath{\Bowtie}}
+\newcommand{\volume}[1]{\ensuremath{V(#1)}}
+\newcommand{\width}[1]{\ensuremath{W(#1)}}
+\newcommand{\vsa}[1][N]{\ensuremath{\widetilde{#1}}}
+\newcommand{\values}[1][v]{\ensuremath{\pvec{#1}}}
+\newcommand{\states}[1][\state]{\ensuremath{\pvec{#1}}}
+% \newcommand{\wf}[1][]{\,\mathrel{\bm{\Longrightarrow}_{\!\!#1}}\,}
+% \newcommand{\wfc}[1][]{\,\mathrel{\bm{\Longleftrightarrow}_{\!\!#1}}\,}
+% \newcommand{\dep}[1][]{\mathrel{\bm{\models}}}
+% \newcommand{\result}{\ensuremath{\semantics{\cdot}}}
+\newcommand{\atsign}{\makeatletter @\makeatother}
+\newcommand{\inv}{{\scriptscriptstyle-\!1}}
+\newcommand{\tospec}{\ensuremath{\rightsquigarrow}}
+\newcommand{\Bool}{\ensuremath{\mathsf{Bool}}}
+\newcommand{\Reals}{\ensuremath{\mathbb{R}}}
+\newcommand{\true}{\ensuremath{\mathsf{True}}}
+\newcommand{\false}{\ensuremath{\mathsf{False}}}
+\newcommand{\ffdsl}{\ensuremath{\dsl_{\mathsf{FF}}}}
+\newcommand{\fedsl}{\ensuremath{\dsl_{\mathsf{FE}}}}
+\newcommandtwoopt{\disambScore}[2][q][\vsa]{\ensuremath{\mathsf{ds}(#1 , #2)}}
+
+%%% MACROS
+\newcommand{\vsajoin}[1][F]{\ensuremath{#1_{\text{\tiny\join}}}}
+\newcommand{\vsaunion}{\ensuremath{\bm{\mathsf{U}}}}
+\newcommand{\vsaunionop}{\ensuremath{\mathbin{\vsaunion}}}
+\newcommand{\semantics}[1]{\ensuremath{\llbracket #1 \rrbracket}}
+\newcommand{\is}{\;:=\;}
+\newcommand{\palt}{\;|\;}
+\newcommand{\bydef}{\ensuremath{\mathrel{\overset{\mathsf{\scriptscriptstyle def}}{=}}}}
+\newcommand{\pvec}[1]{\ensuremath{\vec{#1}\mkern2mu\vphantom{#1}}}
+\newcommand{\assuming}{\;\ifnum\currentgrouptype=16 \middle\fi\vert\;}
+\newcommandtwoopt{\clustering}[2][\vsa][\state]{#1 /_{#2}}
+\newcommand{\todoinline}[1]{\vspace*{\topsep}\todo[inline, caption={\textbf{\textsf{TODO}}}]{#1}}
+
+\newcommand{\stringliteral}[1]{\text{\begin{small}``\texttt{#1}''\end{small}}}
+\robustify{\stringliteral}
+
