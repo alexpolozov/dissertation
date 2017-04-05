@@ -1,0 +1,43 @@
+
+\begin{tikzpicture}[>=latex,line join=bevel,scale=1.1]
+%%
+\begin{scope}
+  \pgfsetstrokecolor{black}
+  \definecolor{strokecol}{rgb}{1.0,1.0,1.0};
+  \pgfsetstrokecolor{strokecol}
+  \definecolor{fillcol}{rgb}{1.0,1.0,1.0};
+  \pgfsetfillcolor{fillcol}
+\end{scope}
+  \node (concat1o23) at (41.999bp,81.5bp)  {$\joinCons[\mathsf{Concat}]$};
+  \node (const23) at (17.999bp,33.5bp) [draw,rectangle,rounded corners] {$\vsa_{23}$};
+  \node (e23) at (41.999bp,57.5bp) [draw,rectangle] {$\vsaunion$};
+  \node (e12) at (130.0bp,57.5bp) [draw,rectangle] {$\vsaunion$};
+  \node (e123) at (85.999bp,109.5bp) [draw,rectangle] {$\vsaunion$};
+  \node (concat12) at (59.999bp,33.5bp)  {$\joinCons[\mathsf{Concat}]$};
+  \node (const12) at (155.0bp,33.5bp) [draw,rectangle,rounded corners] {$\vsa_{12}$};
+  \node (concat12o3) at (130.0bp,81.5bp)  {$\joinCons[\mathsf{Concat}]$};
+  \node (const123) at (85.999bp,81.5bp) [draw,rectangle,rounded corners] {$\vsa_{123}$};
+  \node (e2) at (72.999bp,7.0bp) [draw,rectangle,rounded corners] {$\vsa_2$};
+  \node (e1) at (11.999bp,7.0bp) [draw,rectangle,rounded corners] {$\vsa_1$};
+  \node (e3) at (147.0bp,7.0bp) [draw,rectangle,rounded corners] {$\vsa_3$};
+  \node (concat23) at (114.0bp,33.5bp)  {$\joinCons[\mathsf{Concat}]$};
+  \draw [->] (concat12o3) ..controls (153.11bp,66.505bp) and (165.38bp,56.521bp)  .. (171.0bp,44.0bp) .. controls (174.09bp,37.106bp) and (174.38bp,33.758bp)  .. (171.0bp,27.0bp) .. controls (169.32bp,23.637bp) and (166.68bp,20.74bp)  .. (e3);
+  \draw [->] (e12) ..controls (114.99bp,57.75bp) and (81.517bp,57.677bp)  .. (concat12.north);
+  \draw [->] (e123.south) ..controls (85.999bp,100.65bp) and (85.999bp,100.3bp)  .. (const123);
+  \draw [->] (concat12) ..controls (40.603bp,24.196bp) and (33.585bp,20.999bp)  .. (e1);
+  \draw [->] (e23) ..controls (57.222bp,57.793bp) and (91.174bp,57.809bp)  .. (concat23.north);
+  \draw [->,draw=none] (concat1o23) ..controls (63.422bp,81.5bp) and (63.533bp,81.5bp)  .. (const123);
+  \draw [->] (e123) ..controls (93.296bp,100.02bp) and (98.949bp,97.319bp)  .. (concat12o3);
+  \draw [->] (e12) ..controls (136.63bp,51.611bp) and (136.67bp,51.9bp)  .. (const12);
+  \draw [->] (e23) ..controls (34.654bp,51.698bp) and (35.858bp,52.127bp)  .. (const23);
+  \draw [->] (concat23) ..controls (125.45bp,25.165bp) and (128.1bp,23.171bp)  .. (e3);
+  \draw [->,draw=none] (const123) ..controls (98.139bp,81.5bp) and (98.249bp,81.5bp)  .. (concat12o3);
+  \draw [->] (concat1o23) ..controls (19.437bp,66.386bp) and (7.464bp,56.385bp)  .. (1.9989bp,44.0bp) .. controls (-1.0513bp,37.087bp) and (0.10366bp,34.314bp)  .. (1.9989bp,27.0bp) .. controls (2.12bp,26.533bp) and (2.2561bp,26.065bp)  .. (e1);
+  \draw [->] (concat12o3) ..controls (130.0bp,72.684bp) and (130.0bp,72.446bp)  .. (e12);
+  \draw [->] (e123) ..controls (78.702bp,100.02bp) and (73.049bp,97.319bp)  .. (concat1o23);
+  \draw [->] (concat1o23) ..controls (41.999bp,72.684bp) and (41.999bp,72.446bp)  .. (e23);
+  \draw [->] (concat23) ..controls (97.584bp,24.673bp) and (93.518bp,22.081bp)  .. (e2);
+  \draw [->] (concat12) ..controls (64.101bp,26.455bp) and (64.38bp,25.907bp)  .. (e2);
+%
+\end{tikzpicture}
+

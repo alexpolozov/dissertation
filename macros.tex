@@ -14,12 +14,13 @@
 \newcommand{\constraint}{\ensuremath{\psi}}
 \newcommand{\synalgorithm}{\ensuremath{\mathcal{A}}}
 \newcommand{\rank}{\ensuremath{h}}
-\newcommand{\join}{\ensuremath{\Bowtie}}
+\newcommand{\join}{\ensuremath{\Join}}
 \newcommand{\volume}[1]{\ensuremath{V(#1)}}
 \newcommand{\width}[1]{\ensuremath{W(#1)}}
-\newcommand{\vsa}[1][N]{\ensuremath{\widetilde{#1}}}
+\newcommand{\vsa}{\mathcal{S}}
 \newcommand{\values}[1][v]{\ensuremath{\pvec{#1}}}
 \newcommand{\states}[1][\state]{\ensuremath{\pvec{#1}}}
+\newcommand{\joinCons}[1][F]{#1_{\text{\scriptsize\join}}}
 % \newcommand{\wf}[1][]{\,\mathrel{\bm{\Longrightarrow}_{\!\!#1}}\,}
 % \newcommand{\wfc}[1][]{\,\mathrel{\bm{\Longleftrightarrow}_{\!\!#1}}\,}
 % \newcommand{\dep}[1][]{\mathrel{\bm{\models}}}
@@ -40,10 +41,11 @@
 \newcommand{\vsaunion}{\ensuremath{\bm{\mathsf{U}}}}
 \newcommand{\vsaunionop}{\ensuremath{\mathbin{\vsaunion}}}
 \newcommand{\semantics}[1]{\ensuremath{\llbracket #1 \rrbracket}}
-\newcommand{\is}{\;:=\;}
+\newcommand{\is}{\;\coloneq\;}
 \newcommand{\palt}{\;|\;}
-\newcommand{\bydef}{\ensuremath{\mathrel{\overset{\mathsf{\scriptscriptstyle def}}{=}}}}
+\newcommand{\bydef}{\,\mathrel{\overset{\mathsf{\scriptscriptstyle def}}{=}}\,}
 \newcommand{\pvec}[1]{\ensuremath{\vec{#1}\mkern2mu\vphantom{#1}}}
+\newcommand{\bigmid}{\mathrel{\big|}}
 \newcommand{\assuming}{\;\ifnum\currentgrouptype=16 \middle\fi\vert\;}
 \newcommandtwoopt{\clustering}[2][\vsa][\state]{#1 /_{#2}}
 \newcommand{\todoinline}[1]{\vspace*{\topsep}\todo[inline, caption={\textbf{\textsf{TODO}}}]{#1}}

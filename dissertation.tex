@@ -1,3 +1,4 @@
+\PassOptionsToPackage{numbers}{natbib}
 \documentclass[12pt, proquest, natbib]{uwthesis}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -11,22 +12,29 @@
 
 %%% FONTS
 \usepackage{textcomp}
-\usepackage[charter]{mathdesign}
-\usepackage{berasans}
-\usepackage{beramono}
-\usepackage{wasysym}  % \Bowtie
+\usepackage[scaled=.98, sups]{XCharter}
+\usepackage[scaled=1.04, varqu, varl]{inconsolata}
+\usepackage[scaled]{berasans}
+\usepackage[xcharter, cmbraces, varg, vvarbb, scaled=1.07,
+            subscriptcorrection]{newtxmath}
+\usepackage[cal=boondoxo]{mathalfa}
+\renewcommand*\copyright{{%
+    \fontfamily{bch}\selectfont\textcopyright}}
+\let\emptyset\emptysetAlt
 
 %%% GRAPHICS
 \usepackage{graphicx}
-\usepackage[usenames, dvipsnames]{xcolor}
+\usepackage[usenames, svgnames]{xcolor}
 \usepackage[hypcap=true]{subcaption}
 
 %%% TYPESETTING
 \usepackage[inline]{enumitem}
 \usepackage{booktabs}
 \usepackage{alltt}
+\usepackage[super]{nth}
 
 %%% UTILITIES
+\usepackage{import}
 \usepackage{adjustbox}
 \usepackage{relsize}
 \usepackage{scalerel}
@@ -70,10 +78,6 @@
 \let\oldStatex\Statex
 \renewcommand{\Statex}{\oldStatex \hspace{\algorithmicindent}}
 
-%%% REFERENCES
-\usepackage[capitalize, nameinlink]{cleveref}
-\crefname{defn}{definition}{definitions}
-
 %%% OPTIONS
 % Whether to color hyperlinks in the PDF
 \newtoggle{colorlinks}
@@ -84,10 +88,10 @@
 \usepackage[breaklinks=true, colorlinks=true, pdfauthor={Oleksandr Polozov}]{hyperref}
 \iftoggle{colorlinks}{%
     \hypersetup{
-        citecolor = darkgreen,
-        linkcolor = MidnightBlue,
+        citecolor = DarkGreen,
+        linkcolor = DarkBlue,
         menucolor = black,
-        urlcolor = MidnightBlue,
+        urlcolor = DarkBlue,
     }
 }{%
     \hypersetup{
@@ -98,17 +102,23 @@
     }
 }
 
+%%% REFERENCES
+\usepackage[capitalize]{cleveref}
+\crefname{defn}{definition}{definitions}
+
 %%% TYPOGRAPHIC SETUP
 \makeatletter
+    % Do not hyperlink \citeauthor{}
+    \pretocmd{\NAT@citexnum}{\@ifnum{\NAT@ctype>\z@}{\let\NAT@hyper@\relax}{}}{}{}
     % Make \emph{} bold in an italicized environment
     \DeclareRobustCommand\em
         {\@nomath\em \ifdim \fontdimen\@ne\font >\z@
         \bfseries \else \itshape \fi}
 \makeatother
-\frenchspacing
 \clubpenalty = 10000
 \widowpenalty = 10000
 \displaywidowpenalty = 10000
+\DeclareMathOperator*{\bigvsaunion}{\adjustbox{scale=1.6, valign=t}{$\bm{\mathsf{U}}$}}
 
 %%% THEOREM-LIKE ENVIRONMENTS
 \newtheorem{theorem}{Theorem}
@@ -139,15 +149,15 @@
 
 %%% CONTENT
 \textpages
-\include{intro/main}
-\include{background/main}
-\include{vsa/main}
-\include{prose/main}
-\include{interaction/main}
+\subimport*{intro/}{main}
+\subimport*{background/}{main}
+\subimport*{vsa/}{main}
+\subimport*{prose/}{main}
+\subimport*{interaction/}{main}
 \include{conclusion}
 
 %%% BIBLIOGRAPHY
-\bibliographystyle{plain}
+\bibliographystyle{plainnat}
 \bibliography{dissertation}
 
 %%% APPENDICES
