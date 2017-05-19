@@ -118,7 +118,7 @@
 \clubpenalty = 10000
 \widowpenalty = 10000
 \displaywidowpenalty = 10000
-\DeclareMathOperator*{\bigvsaunion}{\adjustbox{scale=1.6, valign=t}{$\bm{\mathsf{U}}$}}
+\DeclareMathOperator*{\bigvsaunion}{\adjustbox{scale=1.6, valign=m, raise=-2pt}{$\bm{\mathsf{\cup}}$}}
 
 %%% THEOREM-LIKE ENVIRONMENTS
 \newtheorem{theorem}{Theorem}
@@ -149,11 +149,11 @@
 
 %%% CONTENT
 \textpages
-\subimport*{intro/}{main}
-\subimport*{background/}{main}
-\subimport*{vsa/}{main}
-\subimport*{prose/}{main}
-\subimport*{interaction/}{main}
+\subimport{intro/}{main}
+\subimport{background/}{main}
+\subimport{vsa/}{main}
+\subimport{prose/}{main}
+\subimport{interaction/}{main}
 \include{conclusion}
 
 %%% BIBLIOGRAPHY

@@ -1,16 +1,17 @@
 \chapter{Version Space Algebra}
 \label{ch:vsa}
 
-A typical practical DSL may have up to $10^{30}$ programs consistent with a given ispec~\cite{vldb12:semantic}.
-Any synthesis strategy for solving \Cref{problem:syn:general} requires a data structure for succinctly representing such a huge number of
+A typical practical DSL may have up to $10^{30}$ programs consistent with a given spec~\cite{vldb12:semantic}.
+Solving a synthesis problem over such a DSL requires a data structure for succinctly representing such a huge number of
 programs in polynomial space.
 Such a data structure, called \emph{version space algebra} (VSA),
 was defined by Mitchell~\cite{vsa:Mitchell} in the context of machine learning, and later used for programming by demonstration in
 SMARTedit~\cite{lau:smartedit}, FlashFill~\cite{flashfill}, and other synthesis applications.
 Its efficiency is based on the fact that typically many of these $10^{30}$ programs share common subexpressions.
-In this section, we formalize the generic definition of VSA as an essential primitive for synthesis algorithms, expanding
-upon specific applications that were explored previously by \citeauthor{vsa:Mitchell}, \citeauthor{lau:smartedit}, and us.
-We define a set of efficient operations over this data structure that are used by several synthesis algorithms,
+In this section, I formalize the generic definition of VSA as an essential primitive for synthesis algorithms, expanding
+upon specific applications that were explored previously by \citeauthor{vsa:Mitchell}, \citeauthor{lau:smartedit},
+\citeauthor{flashfill}, and others.
+I define a set of efficient operations over this data structure that are used by several synthesis algorithms,
 including the deductive algorithm of \PROSE.
 
 Intuitively, a VSA can be viewed as a directed graph where each node represents a set of programs.
@@ -19,7 +20,7 @@ There are also two kinds of internal (constructor) nodes.
 A \emph{union} VSA node represents a set-theoretic union of the program sets represented by its children VSAs.
 A \emph{join} VSA node with $k$ children VSAs is annotated with a $k$-ary DSL operator $F$, and it represents a cross
 product of all possible applications of $F$ to $k$ parameter programs, independently chosen from the children VSAs.
-Hereinafter we use the words ``program set'' and ``version space algebra'' interchangeably, and use the same notation for both concepts.
+Hereinafter I use the words ``program set'' and ``version space algebra'' interchangeably, and use the same notation for both concepts.
 
 \begin{defn}[Version space algebra]
     \label{def:vsa}
@@ -34,7 +35,7 @@ Hereinafter we use the words ``program set'' and ``version space algebra'' inter
     \begin{align*}
         &P \in \left\{P_1, \dots P_k\right\} \tag*{if $\exists\, j\colon P = P_j$} \\
         &P \in \vsaunion(\vsa_1, \dots, \vsa_k) \tag*{if $\exists\, j\colon P \in \vsa_j$} \\
-        &P \in \joinCons(\vsa_1, \dotsc, \vsa_k) \tag*{if $P = F(P_1, \dots, P_k) \wedge \forall j\colon P_j \in \vsa_j$}
+        &P \in \joinCons(\vsa_1, \dotsc, \vsa_k) \tag*{if $P = F(P_1, \dots, P_k) \ \wedge\ \forall j\colon P_j \in \vsa_j$}
     \end{align*}
 \end{defn}
 
@@ -67,15 +68,16 @@ Therefore in common (non-degenerate) cases $\volume{\vsa} = \mathcal{O}(\log |\v
     Each substring of \stringliteral{425} can be produced by a \textsf{ConstStr} program or a \textsf{SubStr} program.
 \end{example}
 
-We define three operations over VSAs, which are used during the synthesis process: \emph{intersection},
+I define three operations over VSAs, which are used during the synthesis process: \emph{intersection},
 \emph{ranking}, and \emph{clustering}.
 Intersection of VSAs was first used by Lau et al.~\cite{lau:smartedit} and then adapted by us for FlashFill~\cite{flashfill}.
 It has been defined specifically for VSAs built on the SMARTedit and FlashFill DSLs.
-In this section, we define VSA intersection generically, and also introduce ranking and clustering of VSAs, which are our novel contributions.
+In this section, I define VSA intersection generically, and also introduce ranking and clustering of VSAs, which are
+novel contributions of this thesis.
 
 \section{Intersection}
 Intersection of VSAs enables quick unification of two sets of candidate programs that are consistent with two different specifications.
-Given a conjunctive ispec $\spec_1 \wedge \spec_2$, one possible synthesis approach is to learn a set of programs $\vsa_1$ consistent with
+Given a conjunctive spec $\spec_1 \wedge \spec_2$, one possible synthesis approach is to learn a set of programs $\vsa_1$ consistent with
 $\spec_1$, another set of programs $\vsa_2$ consistent with $\spec_2$, and then intersect $\vsa_1$ with $\vsa_2$.
 An efficient algorithm for VSA intersection follows the ideas of automata intersection \cite{hopcroft1979introduction}.
 
@@ -92,7 +94,7 @@ An efficient algorithm for VSA intersection follows the ideas of automata inters
         \joinCons(\vsa'_1 \cap \vsa''_1, \dots, \vsa'_k \cap \vsa''_k) \\
         \joinCons(\vsa'_1, \dots, \vsa'_k) \cap \left\{P_1, \dots, P_m\right\} &\bydef
         \bigl\{P_j = F(P'_1, \dots, P'_k) \mid P'_j \in \vsa'_j\bigr\} \\
-        \vsa_1 \cap \vsa_2 &\bydef \vsa_1 \cap \vsa_2 \text{ as direct program sets otherwise}
+        \vsa_1 \cap \vsa_2 &\bydef \vsa_1 \cap \vsa_2\ \text{ as direct program sets otherwise}
     \end{align*}
 \end{defn}
 
@@ -181,7 +183,7 @@ filtering or splitting into independent search subspaces).
 Constructively, $\clustering$ is defined as follows:
 \begin{align*}
     \clustering[\left\{P_1, \text{...}, P_k\right\}] &\bydef \mathsf{G}\bigl( \{ \semantics{P_i}{\state} \mapsto \{P_i\} \bigmid i = 1..k \} \bigr) & \\
-    \clustering[\vsaunion(\vsa_1,\text{...},\vsa_k)] &\bydef \mathsf{G}\bigl(\textstyle\bigcup\nolimits_k
+    \clustering[\vsaunion(\vsa_1,\text{...},\vsa_k)] &\bydef \mathsf{G}\bigl(\textstyle\bigvsaunion\nolimits_k
         \clustering[\vsa_k]\bigr) & \\
     \clustering[\joinCons(\vsa_1,\text{...},\vsa_k)] &\bydef
         \mathsf{G}\bigl( \bigl\{ \semantics{F(v_1,\text{...},v_k)}{\state} \mapsto \joinCons(\vsa'_1,\text{...},\vsa'_k)
@@ -198,24 +200,26 @@ It groups a set of bindings by keys, uniting VSAs for equal keys with a $\vsauni
 The clustering operation allows us to answer many questions about the current set of candidate programs efficiently.
 For example, it allows us to efficiently filter out the programs in $\vsa$ that are inconsistent with a given specification:
 \begin{defn}[Filtered VSA]
-    Given a VSA $\vsa$ and an ispec $\spec$ on $N$, a \emph{filtered VSA} $\mathsf{Filter}(\vsa, \spec)$ is defined as
+    Given a VSA $\vsa$ and a spec $\spec$ on $N$, a \emph{filtered VSA} $\mathsf{Filter}(\vsa, \spec)$ is defined as
     follows: $\mathsf{Filter}(\vsa, \spec) \bydef \bigl\{P \in \vsa \mid P \models \spec\bigr\}$.
 \end{defn}
 \begin{theorem}
     If $\states$ is a state tuple associated with $\spec$, then:
     \begin{enumerate}[nosep,label=(\arabic*)]
-        \item $\mathsf{Filter}(\vsa, \spec) = \vsaunion\bigl\{\vsa_j \bigmid \langle \values_j \mapsto \vsa_j \rangle
-                \in \clustering[\vsa][\states] \,\wedge\, \spec(\values_j)\bigr\}$.
+        \item $\mathsf{Filter}(\vsa, \spec) = \bigvsaunion\bigl\{\vsa_j \bigmid \langle \values_j \mapsto \vsa_j \rangle
+                \in \clustering[\vsa][\states] \ \wedge\  \spec(\values_j)\bigr\}$.
         \item The construction of $\mathsf{Filter}(\vsa, \spec)$ according to (1) takes
             $\mathcal{O}\bigl(\bigl|\clustering[\vsa][\states]\bigr|\bigr)$ time after the clustering.
     \end{enumerate}
 \end{theorem}
 % \vspace{-\baselineskip}
-% \noindent In~\Cref{sec:topdown}, we show another application of the clustering operation, where it helps us to partition the search space of
+% \noindent In~\Cref{sec:topdown}, I show another application of the clustering operation, where it helps us to partition the search space of
 % candidate programs into subspaces with different behavior on a given input state.
 % We can then parallelize the search process over such independent subspaces of programs.
 
 Estimating the size of $\clustering[\vsa][\states]$ and the running time of clustering is difficult, since these values
 depend not only on $\vsa$ and $\state$, but also on the semantics of the operators in $\dsl$ and the number of
 collisions in their possible output values.
-However, in \Cref{sec:experiments} we show that these values usually remain small for any practical DSL.
+However, in \Cref{sec:experiments} I show that these values usually remain small for any practical DSL.
+
+\todoinline{Representation of VSA as a DSL}

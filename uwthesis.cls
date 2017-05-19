@@ -641,10 +641,16 @@
        \textofChair{Chair of the Supervisory Committee: }
 
 \newcount\@Chair \@Chair0
-\def\Chair#1#2#3{
+\def\Chair#1#2#3[#4]{
   \global\@namedef{C:\expandafter\the\@Chair}{#1}
   \global\@namedef{T:\expandafter\the\@Chair}{#2}
   \global\@namedef{D:\expandafter\the\@Chair}{#3}
+  \expandafter\newif\csname ifCRead\the\@Chair\endcsname
+  \if#4r
+    \csname CRead\the\@Chair true\endcsname
+  \else
+    \csname CRead\the\@Chair false\endcsname
+  \fi
   \ifnum\@Chair>0\textofChair{Co-Chairs of the Supervisory Committee:}\fi
   \global\advance\@Chair by1}
 
@@ -690,8 +696,10 @@
       \@textofCommittee \par 
       \count1=0
       \@whilenum \count1<\@Chair \do
-       {\vskip12\p@ \baselineskip12pt
-        \csname C:\the\count1\endcsname, Chair
+       {\expandafter\csname ifCRead\the\count1 \endcsname
+           \vskip12\p@ \baselineskip12pt
+           \csname C:\the\count1\endcsname, Chair
+        \expandafter\csname fi\endcsname
         \advance\count1 by1}
       \count1=0
       \@whilenum \count1<\@Sign \do
