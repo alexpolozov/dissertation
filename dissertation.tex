@@ -2,7 +2,7 @@
 \documentclass[12pt, proquest, natbib]{uwthesis}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{microtype}
+\usepackage[tracking=true]{microtype}
 
 % MATH
 \usepackage{amsmath, amsthm}
@@ -13,6 +13,7 @@
 %%% FONTS
 \usepackage{textcomp}
 \usepackage[scaled=.98, sups]{XCharter}
+% \usepackage[scaled=.90]{FiraMono}
 \usepackage[scaled=1.04, varqu, varl]{inconsolata}
 \usepackage[scaled]{berasans}
 \usepackage[xcharter, cmbraces, varg, vvarbb, scaled=1.07,
@@ -20,6 +21,8 @@
 \usepackage[cal=boondoxo]{mathalfa}
 \renewcommand*\copyright{{%
     \fontfamily{bch}\selectfont\textcopyright}}
+\DisableLigatures{encoding=T1, family=tt*}
+% \SetTracking[no ligatures={f}]{family=tt*}{-70}
 \let\emptyset\emptysetAlt
 
 %%% GRAPHICS
@@ -53,8 +56,8 @@
 \lstset{
     basicstyle = \small\ttfamily,
     stringstyle = \color{Brown},
-    keywordstyle = \bfseries,
-    commentstyle = \itshape\rmfamily,
+    keywordstyle = \color{MediumBlue},
+    commentstyle = \itshape\rmfamily\color{Green},
     showstringspaces = false,
     columns = flexible,
 	breaklines = true,
@@ -64,8 +67,8 @@
 }
 \lstalias[]{csharp}[Sharp]{C}
 \lstdefinelanguage{dsl}{
-    morekeywords = {language,feature,using,semantics,learners,int,string,@input,@start,values,let,in,@ref,@values,Tuple,@extern,@output,namespace,bool},
-    otherkeywords = {: = ,|,;, = >,:,[,]},
+    morekeywords = {language,feature,using,semantics,learners,int,string,@input,@start,values,let,in,@ref,@values,Tuple,@extern,@output,namespace,bool,std,@id,grammar},
+    otherkeywords = {: = ,|,;, = >,:,[]},
     sensitive = true,
     morecomment = [l]{//},
     morestring = [b]',

@@ -1,2 +1,94 @@
 \chapter{Background}
 \label{ch:background}
+
+\begin{figure*}
+    \centering
+    \lstset{basicstyle = \footnotesize\ttfamily}
+    \def\baselinestretch{1.05}
+    \begin{subfigure}{\textwidth}
+    \hfill\textbf{(a)}\vspace{-0.8\baselineskip}
+    \begin{lstlisting}[language=dsl,gobble=8,morekeywords={Regex}]
+        language FlashFill;
+        // Nonterminals
+        @start string $transform$[string[] $inputs$] := $atom$ | Concat($atom$, $transform$[$inputs$]);
+        string $atom$ := ConstStr($s$) | let string $x$ = std.Kth($inputs$, $k$) in Substring($x$, $pp[x]$);
+        Tuple<int, int> $pp$[string $x$] := std.Pair($pos[x]$, $pos[x]$);
+        int $pos$[string $x$] := AbsPos($x$, $k$) | RegexPos($x$, $rr$, $k$);
+        Tuple<Regex, Regex> $rr$ := std.Pair($r$, $r$);
+        // Terminals
+        string $s$;  $\qquad$   int $k$;  $\qquad$  Regex r;
+    \end{lstlisting}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+    \hrule
+    \vspace{5pt}
+    \hfill\textbf{(b)}
+    \vspace{-0.9\baselineskip}
+    \begin{lstlisting}[language=csharp,gobble=8,breaklines=false,morekeywords={Tuple}]
+        string Concat(string atom, string transform) => atom + transform;
+        string ConstStr(string s) => s;
+        string Substring(string x, Tuple<int, int> pp) {
+            int l = pp.Item1, r = pp.Item2;
+            return (l < 0 || r > x.Length) ? null : x.Substring(l, r - l);
+        }
+        int AbsPos(string x, int k) => k < 0 ? x.Length + k + 1 : k;
+        int? RegexPos(string x, Tuple<Regex, Regex> rr, int k) {
+            Regex r = new Regex("(?<=" + rr.Item1 + ")" + rr.Item2);
+            MatchCollection ms = r.Matches(x);
+            int i = k > 0 ? (k - 1) : (k + ms.Count);
+            return (i < 0 || i >= ms.Count) ? null : ms[i].Index;
+        }
+        [Values("r")] static readonly Regex[] StaticTokens = {
+            new Regex("\\d+"), new Regex("[a-z]+"),  /* more tokens... */
+        }
+    \end{lstlisting}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+    \hrule
+    \vspace{5pt}
+    \hfill\textbf{(c)}
+    \vspace{-0.9\baselineskip}
+    % \begin{lstlisting}[language=csharp,gobble=8]
+    %     Grammar ff = new Grammar("FlashFill.grammar");
+    %     ProgramNode p = ff.ParseAST("let x = std.Kth(v, 0) in
+    %         Substring(x, RegexPos(x, std.Pair(new Regex(\"\"), new Regex(@\"[A-Z]+\")), -1),
+    %                    AbsPos(-1))");
+    %     State input = new State(ff.Symbol("vs"), new string[] {"Leslie Lamport"});
+    %     Assert.Equals(p.Invoke(input), "Lamport");
+    % \end{lstlisting}
+    % \end{subfigure}
+    % \begin{subfigure}{\textwidth}
+    % \hrule
+    % \vspace{5pt}
+    % \hfill\textbf{(d)}
+    % \vspace{-1.3\baselineskip}
+    \begin{lstlisting}[language=dsl,gobble=8,morekeywords={StringRegion,Regex}]
+        language FlashExtract.Text;
+        using grammar FF = FlashFill.Language;
+        // Nonterminals
+        @start StringRegion[] $seq$[StringRegion $doc$] :=
+              @id['LinesMap'] std.Map($\kwlambda\, x \kwfun$ std.Pair($pos$[$x$], $pos$[$x$]), $lines$)
+            | @id['StartSeqMap'] std.Map($\kwlambda\, p \kwfun$ std.Pair($p$, $pos$[GetSuffix($doc$, $p$)]), $positions$)
+            | @id['EndSeqMap'] std.Map($\kwlambda\, p \kwfun$ std.Pair($pos$[GetPrefix($doc$, $p$)], $p$), $positions$);
+        int[] $positions$ := std.FilterInt($init$, $step$, $regexPositions$);
+        int[] $regexPositions$ := RegexMatches($doc$, std.Pair($r$, $r$));
+        int $pos$[string $x$] := FF.$pos$[$x$];  // External nonterminal
+        StringRegion[] $lines$ := std.FilterInt($init$, $step$, $filterLines$);
+        StringRegion[] $filterLines$ := std.Filter($\kwlambda\, \ell \!\kwfun\, match$, $docLines$);
+        StringRegion[] $docLines$ := SplitLines($doc$);
+        bool $match$ := Contains($\ell$, $r$) | StartsWith($\ell$, $r$) | EndsWith($\ell$, $r$);
+        // Terminals
+        int $init$;   $\qquad$  int $step$;  $\qquad$  Regex $r$;
+    \end{lstlisting}
+    \end{subfigure}
+    \caption{\textbf{(a)} A DSL of FlashFill substring extraction $\ffdsl$.
+    \textbf{(b)} Executable semantics of FlashFill operators, defined by the DSL designer in C\#, and
+    a set of possible values for the terminal~$r$.
+    \textbf{(c)}
+    % Example program usage in $\ffdsl$. The program selects the last capitalized word (a substring starting from the last
+    % capital letter) from the first input string $v_1$.
+    % \textbf{(d)}
+    FlashExtract DSL $\fedsl$ for selection of spans in a textual document $doc$.
+    It references position extraction logic $pos$ from $\ffdsl$. }
+    \label{fig:dsl:flashfill}
+\end{figure*}
