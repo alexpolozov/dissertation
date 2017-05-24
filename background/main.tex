@@ -1,20 +1,47 @@
 \chapter{Background}
 \label{ch:background}
+This section presents the preliminaries that are used throughout the thesis.
+First, I introduce FlashFill~\cite{flashfill} and FlashExtract \cite{flashextract}, two instances of prior
+synthesis work that are generalized by the PROSE framework.
+Then, I use them to describe the notation for PROSE DSLs and illustrate it on real-life motivating examples.
+
+\section{Programming by Examples}
+\label{sec:background:pbe}
+
+\Cref{fig:dsl:flashfill} shows definitions of FlashFill and FlashExtract in the input syntax of PROSE.
+
+\paragraph{FlashFill}
+FlashFill is a system for synthesis of string transformations in Microsoft Excel spreadsheets from input-output examples.
+Each program $P$ in the FlashFill DSL $\ffdsl$ takes as input a tuple of \emph{user input strings} $v_1, \dots, v_k$,
+and returns an output string.
+
+The FlashFill language $\ffdsl$ is structured in three layers.
+On the topmost layer (omitted in \Cref{fig:dsl:flashfill}), an $n$-ary
+\textsf{Switch} operator evaluates $n$ predicates over the input string tuple, and chooses the branch that then produces
+the output string.
+\todoinline{Put \textsf{Switch} in the figure}
+Each \textsf{Switch} branch is a \emph{concatenation} of some number of \emph{atomic string expressions}, which
+produce pieces of the output string.
+Each such atomic expression can either be a \emph{constant}, or a \emph{substring} of one of the input strings $v_1,
+\dots, v_k$.
+The \emph{position expression} logic for choosing starting and ending positions for the substring operator can either be
+\emph{absolute} (e.g.  ``$5^{\text{th}}$ character from the right''), or based on \emph{regular expression matching}
+(e.g. ``the last occurrence of a number'').
 
 \begin{figure*}
     \centering
     \lstset{basicstyle = \footnotesize\ttfamily}
     \def\baselinestretch{1.05}
-    \begin{subfigure}{\textwidth}
+    \begin{subfigure}{1.01\textwidth}
     \hfill\textbf{(a)}\vspace{-0.8\baselineskip}
     \begin{lstlisting}[language=dsl,gobble=8,morekeywords={Regex}]
         language FlashFill;
         // Nonterminals
-        @start string $transform$[string[] $inputs$] := $atom$ | Concat($atom$, $transform$[$inputs$]);
-        string $atom$ := ConstStr($s$) | let string $x$ = std.Kth($inputs$, $k$) in Substring($x$, $pp[x]$);
-        Tuple<int, int> $pp$[string $x$] := std.Pair($pos[x]$, $pos[x]$);
-        int $pos$[string $x$] := AbsPos($x$, $k$) | RegexPos($x$, $rr$, $k$);
-        Tuple<Regex, Regex> $rr$ := std.Pair($r$, $r$);
+        @start string $transform$[string[] $inputs$] $\coloneq$ $atom$ | Concat($atom$, $transform$[$inputs$]);
+        string $atom$ $\coloneq$ ConstStr($s$) | let string $x$ = std.Kth($inputs$, $k$) in Substring($x$, $pp[x]$);
+        Tuple<int, int> $pp$[string $x$] $\coloneq$ std.Pair($pos[x]$, $pos[x]$);
+        int $pos$[string $x$] $\coloneq$ AbsPos($x$, $k$) | RegexPos($x$, $rr$, $k$);
+        Tuple<Regex, Regex> $rr$ $\coloneq$ std.Pair($r$, $r$);
         // Terminals
         string $s$;  $\qquad$   int $k$;  $\qquad$  Regex r;
     \end{lstlisting}
@@ -66,17 +93,17 @@
         language FlashExtract.Text;
         using grammar FF = FlashFill.Language;
         // Nonterminals
-        @start StringRegion[] $seq$[StringRegion $doc$] :=
+        @start StringRegion[] $seq$[StringRegion $doc$] $\coloneq$
               @id['LinesMap'] std.Map($\kwlambda\, x \kwfun$ std.Pair($pos$[$x$], $pos$[$x$]), $lines$)
             | @id['StartSeqMap'] std.Map($\kwlambda\, p \kwfun$ std.Pair($p$, $pos$[GetSuffix($doc$, $p$)]), $positions$)
             | @id['EndSeqMap'] std.Map($\kwlambda\, p \kwfun$ std.Pair($pos$[GetPrefix($doc$, $p$)], $p$), $positions$);
-        int[] $positions$ := std.FilterInt($init$, $step$, $regexPositions$);
-        int[] $regexPositions$ := RegexMatches($doc$, std.Pair($r$, $r$));
-        int $pos$[string $x$] := FF.$pos$[$x$];  // External nonterminal
-        StringRegion[] $lines$ := std.FilterInt($init$, $step$, $filterLines$);
-        StringRegion[] $filterLines$ := std.Filter($\kwlambda\, \ell \!\kwfun\, match$, $docLines$);
-        StringRegion[] $docLines$ := SplitLines($doc$);
-        bool $match$ := Contains($\ell$, $r$) | StartsWith($\ell$, $r$) | EndsWith($\ell$, $r$);
+        int[] $positions$ $\coloneq$ std.FilterInt($init$, $step$, $regexPositions$);
+        int[] $regexPositions$ $\coloneq$ RegexMatches($doc$, std.Pair($r$, $r$));
+        int $pos$[string $x$] $\coloneq$ FF.$pos$[$x$];  // External nonterminal
+        StringRegion[] $lines$ $\coloneq$ std.FilterInt($init$, $step$, $filterLines$);
+        StringRegion[] $filterLines$ $\coloneq$ std.Filter($\kwlambda\, \ell \!\kwfun\, match$, $docLines$);
+        StringRegion[] $docLines$ $\coloneq$ SplitLines($doc$);
+        bool $match$ $\coloneq$ Contains($\ell$, $r$) | StartsWith($\ell$, $r$) | EndsWith($\ell$, $r$);
         // Terminals
         int $init$;   $\qquad$  int $step$;  $\qquad$  Regex $r$;
     \end{lstlisting}
@@ -92,3 +119,35 @@
     It references position extraction logic $pos$ from $\ffdsl$. }
     \label{fig:dsl:flashfill}
 \end{figure*}
+
+\begin{example}[{Adapted from \cite[Example 10]{flashfill}}]
+    \label{ex:background:ff}
+    Consider the problem of formatting phone numbers in a list of attendees:
+    \begin{center}
+        \small
+        \begin{tabular}{lll}
+            \toprule
+            % \textbf{Input $\bm{v_1}$} & \textbf{Input $\bm{v_2}$} & \textbf{Output} \\
+            \midrule
+            323-708-7700 & Dr. Leslie B. Lamport & (323) 708-7700 \\
+            (425)-706-7709 & Bill Gates, Sr. & (425) 706-7709 \\
+            510.220.5586 & George Ciprian Necula & (510) 220-5586 \\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    One possible FlashFill program that performs this task is shown below ($\circ$ denotes concatenation):
+
+    \begin{multline*}
+        \mathsf{ConstStr}(\stringliteral{(})
+        \, \circ\, \mathsf{Match}(v_1,\! \stringliteral{\textbackslash d+}, 1) \circ\,
+        \mathsf{ConstStr}(\stringliteral{)\textvisiblespace})
+        \,\circ\, \\ \mathsf{Match}(v_1,\! \stringliteral{\textbackslash d+}, 2) \,\circ\,
+        \mathsf{ConstStr}(\stringliteral{-}) \,\circ\, \mathsf{Match}(v_1,\! \stringliteral{\textbackslash d+}, 3)
+    \end{multline*}
+    where $\mathsf{Match}(x, r, k)$ is a $k^{\text{th}}$ match of a regex $r$ in $x$.
+    In $\ffdsl$, $\mathsf{Match}(x, r, k)$ is an abbreviation for
+    ``$\text{\ttfamily let } x = v_1$ \texttt{in } $\mathsf{SubStr}(x,\langle \mathsf{RegPos}(x, \langle \varepsilon, r\rangle, k),
+    \mathsf{RegPos}(x, \langle r, \varepsilon\rangle, k)\rangle)$''. \linebreak
+    We also use the notation $f_1 \circ \dots \circ f_n$ for $n$-ary string concatenation:
+    ``$\mathsf{Concat}(f_1,\, \mathsf{Concat}(\dots, \mathsf{Concat}(f_{n-1},\, f_n)))$''.
+\end{example}
