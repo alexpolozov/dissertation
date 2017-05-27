@@ -32,21 +32,18 @@ The \emph{position expression} logic for choosing starting and ending positions 
     \centering
     \lstset{basicstyle = \footnotesize\ttfamily}
     \def\baselinestretch{1.05}
-    \begin{subfigure}{1.01\textwidth}
-    \hfill\textbf{(a)}\vspace{-0.8\baselineskip}
+    \hfill\textbf{(a)}
+    \vspace{-0.8\baselineskip}
     \begin{lstlisting}[language=dsl,gobble=8,morekeywords={Regex}]
         language FlashFill;
         // Nonterminals
         @start string $transform$[string[] $inputs$] $\coloneq$ $atom$ | Concat($atom$, $transform$[$inputs$]);
         string $atom$ $\coloneq$ ConstStr($s$) | let string $x$ = std.Kth($inputs$, $k$) in Substring($x$, $pp[x]$);
         Tuple<int, int> $pp$[string $x$] $\coloneq$ std.Pair($pos[x]$, $pos[x]$);
-        int $pos$[string $x$] $\coloneq$ AbsPos($x$, $k$) | RegexPos($x$, $rr$, $k$);
-        Tuple<Regex, Regex> $rr$ $\coloneq$ std.Pair($r$, $r$);
+        int $pos$[string $x$] $\coloneq$ AbsPos($x$, $k$) | RegexPos($x$, std.Pair($r$, $r$), $k$);
         // Terminals
         string $s$;  $\qquad$   int $k$;  $\qquad$  Regex r;
     \end{lstlisting}
-    \end{subfigure}
-    \begin{subfigure}{\textwidth}
     \hrule
     \vspace{5pt}
     \hfill\textbf{(b)}
@@ -65,12 +62,9 @@ The \emph{position expression} logic for choosing starting and ending positions 
             int i = k > 0 ? (k - 1) : (k + ms.Count);
             return (i < 0 || i >= ms.Count) ? null : ms[i].Index;
         }
-        [Values("r")] static readonly Regex[] StaticTokens = {
-            new Regex("\\d+"), new Regex("[a-z]+"),  /* more tokens... */
-        }
+        [Values("r")] static readonly Regex[] StaticTokens =
+            { new Regex("\\d+"), new Regex("[a-z]+"),  /* more tokens... */ }
     \end{lstlisting}
-    \end{subfigure}
-    \begin{subfigure}{\textwidth}
     \hrule
     \vspace{5pt}
     \hfill\textbf{(c)}
@@ -107,7 +101,6 @@ The \emph{position expression} logic for choosing starting and ending positions 
         // Terminals
         int $init$;   $\qquad$  int $step$;  $\qquad$  Regex $r$;
     \end{lstlisting}
-    \end{subfigure}
     \caption{\textbf{(a)} A DSL of FlashFill substring extraction $\ffdsl$.
     \textbf{(b)} Executable semantics of FlashFill operators, defined by the DSL designer in C\#, and
     a set of possible values for the terminal~$r$.
@@ -122,12 +115,12 @@ The \emph{position expression} logic for choosing starting and ending positions 
 
 \begin{example}[{Adapted from \cite[Example 10]{flashfill}}]
     \label{ex:background:ff}
-    Consider the problem of formatting phone numbers in a list of attendees:
+    Consider the problem of formatting phone numbers in a list of conference attendees:
     \begin{center}
         \small
         \begin{tabular}{lll}
             \toprule
-            % \textbf{Input $\bm{v_1}$} & \textbf{Input $\bm{v_2}$} & \textbf{Output} \\
+            \textbf{Input} \bmsub v1 & \textbf{Input} \bmsub v2 & \textbf{Output} \\
             \midrule
             323-708-7700 & Dr. Leslie B. Lamport & (323) 708-7700 \\
             (425)-706-7709 & Bill Gates, Sr. & (425) 706-7709 \\
@@ -135,19 +128,17 @@ The \emph{position expression} logic for choosing starting and ending positions 
             \bottomrule
         \end{tabular}
     \end{center}
-    One possible FlashFill program that performs this task is shown below ($\circ$ denotes concatenation):
-
+    One FlashFill program that performs this task is shown below ($\circ$ denotes concatenation):
     \begin{multline*}
-        \mathsf{ConstStr}(\stringliteral{(})
-        \, \circ\, \mathsf{Match}(v_1,\! \stringliteral{\textbackslash d+}, 1) \circ\,
-        \mathsf{ConstStr}(\stringliteral{)\textvisiblespace})
-        \,\circ\, \\ \mathsf{Match}(v_1,\! \stringliteral{\textbackslash d+}, 2) \,\circ\,
-        \mathsf{ConstStr}(\stringliteral{-}) \,\circ\, \mathsf{Match}(v_1,\! \stringliteral{\textbackslash d+}, 3)
+        \mathsf{ConstStr}(\stringliteral{(}) \concat \mathsf{Match}(v_1, \stringliteral{\textbackslash d+}, 1) \concat
+        \mathsf{ConstStr}(\stringliteral{)\textvisiblespace}) \concat \\
+        \mathsf{Match}(v_1, \stringliteral{\textbackslash d+}, 2) \concat
+        \mathsf{ConstStr}(\stringliteral{-}) \concat \mathsf{Match}(v_1, \stringliteral{\textbackslash d+}, 3)
     \end{multline*}
-    where $\mathsf{Match}(x, r, k)$ is a $k^{\text{th}}$ match of a regex $r$ in $x$.
-    In $\ffdsl$, $\mathsf{Match}(x, r, k)$ is an abbreviation for
-    ``$\text{\ttfamily let } x = v_1$ \texttt{in } $\mathsf{SubStr}(x,\langle \mathsf{RegPos}(x, \langle \varepsilon, r\rangle, k),
-    \mathsf{RegPos}(x, \langle r, \varepsilon\rangle, k)\rangle)$''. \linebreak
-    We also use the notation $f_1 \circ \dots \circ f_n$ for $n$-ary string concatenation:
-    ``$\mathsf{Concat}(f_1,\, \mathsf{Concat}(\dots, \mathsf{Concat}(f_{n-1},\, f_n)))$''.
+    where $\mathsf{Match}(w, r, k)$ in $\ffdsl$ is a $k^{\text{th}}$ match of a regex $r$ in $w$ ---
+    an abbreviation for
+    ``\dslinline|let $x = w$ in Substring($x$, $\langle$RegexPos($x$, $\langle\varepsilon,\, r\rangle$, $k$), RegexPos($x$, $\langle r,\, \varepsilon\rangle$, $k$)$\rangle$)|''.
+    Here we also use the notation $\langle x, y \rangle$ for ``\lstinline[language=dsl,mathescape]|std.Pair($x$, $y$)|'' and $f_1 \concat \dots \concat
+    f_n$ for $n$-ary string concatenation:
+    ``\dslinline|Concat($f_1$, Concat($\dots$, Concat($f_{n-1}$, $f_n$)))|''.
 \end{example}

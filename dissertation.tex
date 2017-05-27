@@ -3,17 +3,15 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[tracking=true]{microtype}
+\usepackage{textcomp}
 
 % MATH
-\usepackage{amsmath, amsthm}
+\usepackage{amsmath, amsthm, amsfonts, amssymb}
 \usepackage{thmtools}
 \usepackage{mathtools}
-\usepackage{bm}
 
 %%% FONTS
-\usepackage{textcomp}
 \usepackage[scaled=.98, sups]{XCharter}
-% \usepackage[scaled=.90]{FiraMono}
 \usepackage[scaled=1.04, varqu, varl]{inconsolata}
 \usepackage[scaled]{berasans}
 \usepackage[xcharter, cmbraces, varg, vvarbb, scaled=1.07,
@@ -22,7 +20,6 @@
 \renewcommand*\copyright{{%
     \fontfamily{bch}\selectfont\textcopyright}}
 \DisableLigatures{encoding=T1, family=tt*}
-% \SetTracking[no ligatures={f}]{family=tt*}{-70}
 \let\emptyset\emptysetAlt
 
 %%% GRAPHICS
@@ -35,6 +32,7 @@
 \usepackage{booktabs}
 \usepackage{alltt}
 \usepackage[super]{nth}
+\usepackage{bm}
 
 %%% UTILITIES
 \usepackage{import}
@@ -68,7 +66,7 @@
 \lstalias[]{csharp}[Sharp]{C}
 \lstdefinelanguage{dsl}{
     morekeywords = {language,feature,using,semantics,learners,int,string,@input,@start,values,let,in,@ref,@values,Tuple,@extern,@output,namespace,bool,std,@id,grammar},
-    otherkeywords = {: = ,|,;, = >,:,[]},
+    otherkeywords = {: = ,;, = >,:,[]},
     sensitive = true,
     morecomment = [l]{//},
     morestring = [b]',
@@ -137,7 +135,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 \include{macros}
-\listoftodos
+\listoftodos\todototoc
 
 %%% PRELIMINARY PAGES
 \hypersetup{pageanchor=false}

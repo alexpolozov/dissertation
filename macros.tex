@@ -35,6 +35,7 @@
 \newcommand{\ffdsl}{\ensuremath{\dsl_{\mathsf{FF}}}}
 \newcommand{\fedsl}{\ensuremath{\dsl_{\mathsf{FE}}}}
 \newcommandtwoopt{\disambScore}[2][q][\vsa]{\ensuremath{\mathsf{ds}(#1 , #2)}}
+\newcommand{\dslinline}{\lstinline[language=dsl,mathescape]}
 
 %%% MACROS
 \newcommand{\vsajoin}[1][F]{\ensuremath{#1_{\text{\tiny\join}}}}
@@ -48,10 +49,14 @@
 \newcommand{\bigmid}{\mathrel{\big|}}
 \newcommand{\assuming}{\;\ifnum\currentgrouptype=16 \middle\fi\vert\;}
 \newcommandtwoopt{\clustering}[2][\vsa][\state]{#1 /_{#2}}
-\newcommand{\todoinline}[1]{\vspace*{\topsep}\todo[inline, caption={\textbf{\textsf{TODO}}}]{#1}}
+\newcommand{\todoinline}[1]{\vspace*{\topsep}\todo[inline]{\textbf{\textsf{TODO}}: #1}}
+\newcommand{\concat}{\mathrel{\circ}}
 
 \newcommand{\stringliteral}[1]{\text{\begin{small}``\texttt{#1}''\end{small}}}
 \robustify{\stringliteral}
 
 \newcommand{\kwlambda}{\textcolor{MediumBlue}{\lambda}}
 \newcommand{\kwfun}{\mathbin{\textcolor{MediumBlue}{\ \Rightarrow}}}
+
+% This is out of necessity to fix an inexplicable bug...
+\newcommand{\bmsub}[2]{\ensuremath{\bm{#1}_{\bm{#2}}}}
