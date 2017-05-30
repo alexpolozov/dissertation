@@ -1,0 +1,58 @@
+\begin{figure}[p!]
+    \uwsinglespace
+    \centering
+    % \small
+    \newcommand{\onep}{\textsuperscript{+}}
+    \newcommand{\optional}{\textsubscript{\textsf{opt}}\ }
+    \renewcommand{\synt}[1]{\textsl{#1}}
+    \renewcommand{\syntleft}{\slshape}
+    \renewcommand{\syntright}{}
+    \begin{tcolorbox}
+    \begin{grammar}
+        \parskip=3pt
+        <document> ::= <reference>* <using>* <languge-name> <decl>\onep
+
+        <reference> ::= \textbf{\#reference} <dll-path> \pmb{;}
+
+        <using> ::= \textbf{using} <namespace> \pmb{;} \\
+            | \textbf{using semantics} <type> \pmb{;} \\
+            | \textbf{using learners} <type> \pmb{;} \\
+            | \textbf{using language} <namespace> = <member-name> \pmb{;}
+
+        <language-name> ::= \textbf{language} <namespace> \pmb{;}
+
+        <decl> ::= <annotation>* <type> <symbol> (\textbf{[} <params> \textbf{]})\optional (\textbf{:=} <nonterminal-body>)\optional \pmb{;}
+
+        <annotation> ::= \textbf{@start} | \textbf{@id[}\synt{symbol-name}\textbf{]} | \textbf{@values[}\synt{member-name}\textbf{]} | \dots
+
+        <params> ::= <param> (\pmb{,} <param>)*
+
+        <param> ::= <type> <symbol>
+
+        <nonterminal-body> ::= <rule> (\pmb{|} <rule>)*
+
+        <rule> ::= (<namespace> \textbf{.})\optional <symbol> \\
+        | (<namespace> \textbf{.})\optional <operator-name>$\pmb{\bigl(}$(<arg> (\pmb{,} <arg>)* )\optional$\pmb{\bigr)}$ \\
+        | \textbf{let} <type> <symbol> \textbf{=} <rule> \textbf{in} <rule>
+
+        <arg> ::= <symbol> | $\bm{\lambda}$ <symbol> $\bm{\Rightarrow}$ <rule>
+
+        <symbol,~operator-name,~namespace> ::= $\langle$\textup{id}$\rangle$
+
+        <dll-path,~symbol-name> ::= \pmb{\textquotesingle}$\langle$\textup{string}$\rangle$\pmb{\textquotesingle}
+
+        <member-name> ::= $\langle$\textup{member in a target language}$\rangle$
+
+        <type> ::=  $\langle$\textup{type in a target language}$\rangle$
+    \end{grammar}
+    \end{tcolorbox}
+    \caption{PROSE DSL definition language.
+        A DSL is a set of (typed and annotated) symbol definitions, where each symbol is either a terminal, or a
+        nonterminal (possibly with parameters) defined through a set of rules.
+        Each rule is a conversion of nonterminals, an operator with some arguments (symbols or $\lambda$-functions), or
+        a \texttt{let} definition.
+        A DSL may reference types and members from external libraries, as well as other DSLs (treated as namespace
+        imports).
+    }
+    \label{fig:dsldefinition}
+\end{figure}

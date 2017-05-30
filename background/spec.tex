@@ -1,0 +1,86 @@
+\section{Inductive Specification}
+\label{sec:background:spec}
+
+\emph{Inductive synthesis} or \emph{programming by examples} traditionally refers to the process of synthesizing a
+program from a specification that consists of input-output examples.
+Tools like FlashFill~\cite{flashfill}, IGOR2~\cite{igor2}, Magic Haskeller~\cite{magichaskeller}
+fall in this category.
+Each of them accepts a conjunction of pairs of concrete values for the input state and the corresponding output.
+We generalize this formulation in two ways:
+\begin{enumerate*}[label=\textbf{(\alph*)}]
+    \item by extending the specification to \emph{properties} of program output as opposed to just its \emph{value}, and
+        \label{item:spec:properties}
+    \item by allowing arbitrary boolean connectives instead of just conjunctions. \label{item:spec:connectives}
+\end{enumerate*}
+
+Generalization \ref*{item:spec:properties} is useful when completely describing the output on a given input is too
+cumbersome for a user.
+For example, in FlashExtract the user provides instances of strings that should (or should not) \emph{belong} to the
+output list of selections in a textual document.
+Describing an entire output list would be too time-consuming and error-prone.
+
+Generalization \ref*{item:spec:connectives} arises as part of the \emph{problem reduction} process that happens
+internally in the synthesizer algorithms.
+Specifications on DSL operators get refined into specifications on operator parameters, and the latter specifications
+are often shaped as arbitrary boolean formulas.
+For instance, in FlashFill, to synthesize a substring program that extracts a substring $s$ from a given input
+string $v$, we synthesize a position extraction program that returns \emph{any} occurrence of $s$ in $v$ (which is a
+\emph{disjunctive} specification).
+In addition, boolean connectives may also appear in the top-level specifications provided by users.
+For instance, in FlashExtract, a user may provide a \emph{negative example} (an element \emph{not} belonging to the
+output list).
+
+\begin{defn}[Inductive specification]
+    Let $N\colon\tau$ be a symbol in a DSL $\dsl$.
+    An \emph{inductive specification} (``spec'') $\spec$ for a program rooted at $N$ is a quantifier-free first-order
+    predicate of type $\vec{\tau} \to \mathsf{Bool}$ in NNF with $n$ atoms $\langle \state_1, \constraint_1\rangle$,
+    \dots, $\langle \state_{|\vec{\tau}|}, \constraint_{|\vec{\tau}|}\rangle$.
+    Each atom is a pair of a concrete input state $\state_i$ over $\freeVariables{N}$ and a \emph{constraint}
+    $\constraint_i\colon \tau \to \mathsf{Bool}$ constraining the output of a desired program on the input $\state_i$.
+\end{defn}
+
+\begin{defn}[Valid program]
+    We say that a program $P$ \emph{satisfies} a spec $\spec$ (written $P \models \spec$) iff the formula
+    $\spec\left[ \langle \state_i, \constraint_i\rangle \coloneqq \constraint_i\left(\semantics{P}{\state_i}\right)
+    \right]$ holds.
+    In other words, $\spec$ should hold as a boolean formula over the statements ``the output of $P$ on $\state_i$
+    satisfies the constraint $\constraint_i$'' as atoms.
+    % We often denote the output being constrained as $\result$, assuming implicit $P$ and $\state$.
+\end{defn}
+
+\begin{defn}[Valid program set]
+    A program set $\vsa$ is \emph{valid} for spec $\spec$ (written $\vsa \models \spec$) iff all programs in $\vsa$
+    satisfy $\spec$.
+\end{defn}
+
+\begin{example}
+    Given a set of I/O examples $\left\{\state_i, o_i\right\}_{i=1}^m$,
+    a program $P$ is valid iff $\semantics{P}{\state_i} = o_i$ for all $i$.
+    In our formulation, such a spec is represented as a conjunction $\spec = \bigwedge_{i=1}^m \langle \state_i,
+    \constraint_i\rangle$.
+    Here each constraint $\constraint_i$ on the program output is an \emph{equality predicate}:
+    $\constraint_i(v) \coloneqq [v = o_i]$.
+\end{example}
+
+\begin{example}
+    In FlashExtract, a program's output is a sequence of spans $\langle l, r\rangle$ in a text document~$D$.
+    A user provides a sequence of \emph{positive} examples $Y$ (a subsequence of spans from the desired
+    output), and a set of \emph{negative} examples $N$ (a set of spans that the desired output should not intersect).
+
+    The spec here is a conjunction $\spec = \langle \state, \constraint^+\rangle \wedge
+    \langle\state,\constraint^-\rangle$, where positive constraint $\constraint^+$ is a \emph{subsequence predicate}:
+    $\constraint^+(v) \coloneqq [v \sqsubseteq Y]$, and negative constraint $\constraint^-$ is a
+    \emph{non-intersection predicate}: $\constraint^-(v) \coloneqq [v \cap N = \emptyset]$.
+    The associated input states for both constraints are equal to the same $\state = \left\{doc \mapsto D\right\}$,
+    where symbol $doc = \inputSymbol{\dsl}$.
+    \label{ex:dsl:flashextract}
+\end{example}
+
+Often a spec $\spec$ can be decomposed into a conjunction of output properties that must be satisfied on \emph{distinct}
+input states.
+In this case we use a simpler notation $\spec = \left\{ \state_i \rightsquigarrow \constraint_i \right\}_{i=1}^m$.
+A program~$P$ satisfies this spec if its output on each input state $\state_i$ satisfies the constraint $\constraint_i$.
+For instance, I/O examples are written as $\left\{\state_i \rightsquigarrow o_i\right\}_{i=1}^m$, and
+subsequence specs of FlashExtract are written as $\state \rightsquigarrow (\result \sqsubset Y) \wedge (\result
+\cap N = \emptyset)$, where $\result$ denotes the desired output of $P$.
+

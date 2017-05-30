@@ -212,14 +212,20 @@ For example, it allows us to efficiently filter out the programs in $\vsa$ that 
             $\mathcal{O}\bigl(\bigl|\clustering[\vsa][\states]\bigr|\bigr)$ time after the clustering.
     \end{enumerate}
 \end{theorem}
-% \vspace{-\baselineskip}
-% \noindent In~\Cref{sec:topdown}, I show another application of the clustering operation, where it helps us to partition the search space of
-% candidate programs into subspaces with different behavior on a given input state.
-% We can then parallelize the search process over such independent subspaces of programs.
 
 Estimating the size of $\clustering[\vsa][\states]$ and the running time of clustering is difficult, since these values
 depend not only on $\vsa$ and $\state$, but also on the semantics of the operators in $\dsl$ and the number of
 collisions in their possible output values.
 However, in \Cref{sec:experiments} I show that these values usually remain small for any practical DSL.
 
-\todoinline{Representation of VSA as a DSL}
+\paragraph{VSA as a language}
+Another view on a version space algebra is that it is a different representation of a \emph{language}, isomorphic to a
+context-free grammar (CFG).
+In formal logic, a language is defined as a set of programs.
+We commonly represent languages as CFGs, which are based on two syntactic features: \emph{union of rules} ($|$) and
+\emph{sharing of nonterminals}.
+A VSA is also a representation for a set of programs; it is an AST-based representation that leverages
+two syntactic features: \emph{union} ($\vsaunion$) and \emph{join of shared VSAs} ($\joinCons$).
+These representations are isomorphic; in fact, a VSA built from a DSL $\dsl$ is essentially a CFG for some DSL $\dsl'
+\subseteq \dsl$.
+% For instance, if $N = \start{\dsl}$, then the VSA $\vsa = \dsl|_{N}$ is isomorphic to the CFG of $\dsl$.

@@ -1,0 +1,23 @@
+\section{Domain-Specific Program Synthesis}
+\label{sec:background:problem}
+We are now ready to formally define the problem of \emph{domain-specific program synthesis}, motivated and tackled in
+this work.
+
+\begin{problem}[Domain-specific synthesis]
+    \label{problem:syn:general}
+    Given a DSL $\dsl$, and a \emph{learning task} $\langle N, \spec\rangle$ for a symbol $N \in \dsl$, the
+    \emph{domain\hyp{}specific synthesis} problem $\mathsf{Learn}(N, \spec)$ is to find some set $\vsa$ of programs
+    rooted at $N$, valid for $\spec$.
+
+    Some instances of domain-specific synthesis include:
+    \begin{itemize}[nosep]
+        \item Finding \emph{one} program: $|\vsa| = 1$.
+        \item \textbf{Complete synthesis:} finding \emph{all} programs.
+        \item \textbf{Ranked synthesis:} finding $k$ \emph{topmost-ranked} programs according to some domain-specific
+            \emph{ranking function}~$\rank\colon\dsl \to \Reals$.
+        \item \textbf{Incremental synthesis:} finding one, all, or some programs assuming that the given spec $\spec$
+            \emph{refines} some previously accumulated spec $\spec_0$, and the previous learned result for $\spec_0$ is
+            $\mathsf{Learn}(N, \spec_0) = \vsa_0$.
+    \end{itemize}
+    We discuss all these specific problems and their implementation in the PROSE framework in the following sections.
+\end{problem}

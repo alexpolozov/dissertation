@@ -1,0 +1,178 @@
+\section{Programming by Examples}
+\label{sec:background:pbe}
+
+As discussed in \Cref{ch:related}, the field of domain-specific programming by examples (PBE) started with
+FlashFill~\cite{flashfill} and its successors: FlashExtract~\cite{flashextract}, FlashRelate~\cite{flashrelate}, and
+others.
+In this work, I use FlashFill and FlashExtract as the running examples of PBE DSLs generalized by the PROSE framework.
+For future reference, \Cref{fig:dsl:flashfill} shows definitions of FlashFill and FlashExtract in the input syntax of
+PROSE.
+
+\paragraph{FlashFill}
+FlashFill is a system for synthesis of string transformations in Microsoft Excel spreadsheets from input-output
+examples.
+Each program $P$ in the FlashFill DSL $\ffdsl$ takes as input a tuple of \emph{user input strings} $v_1, \dots, v_k$,
+and returns an output string.
+
+The FlashFill language $\ffdsl$ is structured in three layers.
+On the topmost layer (omitted in \Cref{fig:dsl:flashfill}), an $n$-ary
+\textsf{Switch} operator evaluates $n$ predicates over the input string tuple, and chooses the branch that then produces
+the output string.
+\todoinline{Put \textsf{Switch} in the figure}
+Each \textsf{Switch} branch is a \emph{concatenation} of some number of \emph{atomic string expressions}, which
+produce pieces of the output string.
+Each such atomic expression can either be a \emph{constant}, or a \emph{substring} of one of the input strings $v_1,
+\dots, v_k$.
+The \emph{position expression} logic for choosing starting and ending positions for the substring operator can either be
+\emph{absolute} (e.g.  ``$5^{\text{th}}$ character from the right''), or based on \emph{regular expression matching}
+(e.g. ``the last occurrence of a number'').
+
+\begin{figure*}
+    \centering
+    \lstset{basicstyle = \footnotesize\ttfamily}
+    \def\baselinestretch{1.05}
+    \hfill\textbf{(a)}
+    \vspace{-0.8\baselineskip}
+    \begin{lstlisting}[language=dsl,gobble=8,morekeywords={Regex}]
+        language FlashFill;
+        // Nonterminals
+        @start string $transform$[string[] $inputs$] $\coloneq$ $atom$ | Concat($atom$, $transform$[$inputs$]);
+        string $atom$ $\coloneq$ ConstStr($s$) | let string $x$ = std.Kth($inputs$, $k$) in Substring($x$, $pp[x]$);
+        Tuple<int, int> $pp$[string $x$] $\coloneq$ std.Pair($pos[x]$, $pos[x]$);
+        int $pos$[string $x$] $\coloneq$ AbsPos($x$, $k$) | RegexPos($x$, std.Pair($r$, $r$), $k$);
+        // Terminals
+        string $s$;  $\qquad$   int $k$;  $\qquad$  Regex r;
+    \end{lstlisting}
+    \hrule
+    \vspace{5pt}
+    \hfill\textbf{(b)}
+    \vspace{-0.9\baselineskip}
+    \begin{lstlisting}[language=csharp,gobble=8,breaklines=false,morekeywords={Tuple}]
+        string Concat(string atom, string transform) => atom + transform;
+        string ConstStr(string s) => s;
+        string Substring(string x, Tuple<int, int> pp) {
+            int l = pp.Item1, r = pp.Item2;
+            return (l < 0 || r > x.Length) ? null : x.Substring(l, r - l);
+        }
+        int AbsPos(string x, int k) => k < 0 ? x.Length + k + 1 : k;
+        int? RegexPos(string x, Tuple<Regex, Regex> rr, int k) {
+            Regex r = new Regex("(?<=" + rr.Item1 + ")" + rr.Item2);
+            MatchCollection ms = r.Matches(x);
+            int i = k > 0 ? (k - 1) : (k + ms.Count);
+            return (i < 0 || i >= ms.Count) ? null : ms[i].Index;
+        }
+        [Values("r")] static readonly Regex[] StaticTokens =
+            { new Regex("\\d+"), new Regex("[a-z]+"),  /* more tokens... */ }
+    \end{lstlisting}
+    \hrule
+    \vspace{5pt}
+    \hfill\textbf{(c)}
+    \vspace{-0.9\baselineskip}
+    % \begin{lstlisting}[language=csharp,gobble=8]
+    %     Grammar ff = new Grammar("FlashFill.grammar");
+    %     ProgramNode p = ff.ParseAST("let x = std.Kth(v, 0) in
+    %         Substring(x, RegexPos(x, std.Pair(new Regex(\"\"), new Regex(@\"[A-Z]+\")), -1),
+    %                    AbsPos(-1))");
+    %     State input = new State(ff.Symbol("vs"), new string[] {"Leslie Lamport"});
+    %     Assert.Equals(p.Invoke(input), "Lamport");
+    % \end{lstlisting}
+    % \end{subfigure}
+    % \begin{subfigure}{\textwidth}
+    % \hrule
+    % \vspace{5pt}
+    % \hfill\textbf{(d)}
+    % \vspace{-1.3\baselineskip}
+    \begin{lstlisting}[language=dsl,gobble=8,morekeywords={StringRegion,Regex}]
+        language FlashExtract.Text;
+        using grammar FF = FlashFill.Language;
+        // Nonterminals
+        @start StringRegion[] $seq$[StringRegion $doc$] $\coloneq$
+              @id['LinesMap'] std.Map($\kwlambda\, x \kwfun$ std.Pair($pos$[$x$], $pos$[$x$]), $lines$)
+            | @id['StartSeqMap'] std.Map($\kwlambda\, p \kwfun$ std.Pair($p$, $pos$[GetSuffix($doc$, $p$)]), $positions$)
+            | @id['EndSeqMap'] std.Map($\kwlambda\, p \kwfun$ std.Pair($pos$[GetPrefix($doc$, $p$)], $p$), $positions$);
+        int[] $positions$ $\coloneq$ std.FilterInt($init$, $step$, $regexPositions$);
+        int[] $regexPositions$ $\coloneq$ RegexMatches($doc$, std.Pair($r$, $r$));
+        int $pos$[string $x$] $\coloneq$ FF.$pos$[$x$];  // External nonterminal
+        StringRegion[] $lines$ $\coloneq$ std.FilterInt($init$, $step$, $filterLines$);
+        StringRegion[] $filterLines$ $\coloneq$ std.Filter($\kwlambda\, \ell \!\kwfun\, match$, $docLines$);
+        StringRegion[] $docLines$ $\coloneq$ SplitLines($doc$);
+        bool $match$ $\coloneq$ Contains($\ell$, $r$) | StartsWith($\ell$, $r$) | EndsWith($\ell$, $r$);
+        // Terminals
+        int $init$;   $\qquad$  int $step$;  $\qquad$  Regex $r$;
+    \end{lstlisting}
+    \caption{\textbf{(a)} A DSL of FlashFill substring extraction $\ffdsl$.
+    \textbf{(b)} Executable semantics of FlashFill operators, defined by the DSL designer in C\#, and
+    a set of possible values for the terminal~$r$.
+    \textbf{(c)}
+    FlashExtract DSL $\fedsl$ for selection of spans in a textual document $doc$.
+    It references position extraction logic $pos$ from $\ffdsl$. }
+    \label{fig:dsl:flashfill}
+\end{figure*}
+
+\begin{example}[{Adapted from \cite[Example 10]{flashfill}}]
+    \label{ex:background:ff}
+    Consider the problem of formatting phone numbers in a list of conference attendees:
+    \begin{center}
+        \small
+        \begin{tabular}{lll}
+            \toprule
+            \textbf{Input} \bmsub v1 & \textbf{Input} \bmsub v2 & \textbf{Output} \\
+            \midrule
+            323-708-7700 & Dr. Leslie B. Lamport & (323) 708-7700 \\
+            (425)-706-7709 & Bill Gates, Sr. & (425) 706-7709 \\
+            510.220.5586 & George Ciprian Necula & (510) 220-5586 \\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+    One FlashFill program that performs this task is shown below ($\circ$ denotes concatenation):
+    \begin{multline*}
+        \mathsf{ConstStr}(\stringliteral{(}) \concat \mathsf{Match}(v_1, \stringliteral{\textbackslash d+}, 1) \concat
+        \mathsf{ConstStr}(\stringliteral{)\textvisiblespace}) \concat \\
+        \mathsf{Match}(v_1, \stringliteral{\textbackslash d+}, 2) \concat
+        \mathsf{ConstStr}(\stringliteral{-}) \concat \mathsf{Match}(v_1, \stringliteral{\textbackslash d+}, 3)
+    \end{multline*}
+    where $\mathsf{Match}(w, r, k)$ in $\ffdsl$ is a $k^{\text{th}}$ match of a regex $r$ in $w$ ---
+    an abbreviation for
+    ``\dslinline|let $x = w$ in Substring($x$, $\langle$RegexPos($x$, $\langle\varepsilon,\, r\rangle$, $k$), RegexPos($x$, $\langle r,\, \varepsilon\rangle$, $k$)$\rangle$)|''.
+    Here we also use the notation $\langle x, y \rangle$ for ``\dslinline|std.Pair($x$, $y$)|'' and $f_1 \concat \dots \concat
+    f_n$ for $n$-ary string concatenation:
+    ``\dslinline|Concat($f_1$, Concat($\dots$, Concat($f_{n-1}$, $f_n$)))|''.
+\end{example}
+
+\paragraph{FlashExtract}
+FlashExtract is a system for synthesis of scripts for extracting data from semi-structured documents.
+It has been integrated in Microsoft PowerShell 3.0 for release with Windows 10 and in the Azure Operational Management
+Suite for extracting custom fields from log files.
+In the original publication, \citeauthor*{flashextract} present three instantiations of FlashExtract; in this work, we
+focus on the \emph{text} instantiation as a running example, although \emph{Web} and \emph{table} instantiations were
+also reimplemented on top of the PROSE framework (see \Cref{sec:casestudies}).
+
+Each program in the FlashExtract DSL $\fedsl$ takes as input a \emph{textual document} $doc$, and returns a sequence
+of spans in that document.
+The sequence is selected based on combinations of \texttt{Map} and \texttt{Filter} operators, applied to sequences of
+matches of various regular expressions in $doc$.
+
+\begin{figure}[t]
+    \centering
+    \begin{tcbraster}[beamer, raster columns=1, size=minimal]
+        \tcbincludegraphics{figures/flashextract-scenario}
+    \end{tcbraster}
+    \caption{An illustrative scenario for data extraction from semi-structured text using FlashExtract~\cite[Figure
+    1]{flashextract}.}
+    \label{fig:example:flashextract}
+    \vspace{-\baselineskip}
+\end{figure}
+
+\begin{example}[{Adapted from \cite[Examples 1 and 4]{flashextract}}]
+    \label{ex:background:fe}
+    Consider the textual file shown in \Cref{fig:example:flashextract}.
+    \todoinline{Make a better example with Playground}
+    One possible $\fedsl$ program that extracts a sequence of yellow regions from it is
+    \begin{lstlisting}[language=dsl]
+        LinesMap($\fun{x}$ $\langle$AbsPos($x$, 0), AbsPos($x$, -1)$\rangle$,
+            Filter($\fun{\ell}$ EndsWith($\ell$, '\d+"'), SplitLines($doc$)))
+    \end{lstlisting}
+    It splits $doc$ into a sequence of lines, selects only the lines ending with a number followed by a quote, and on
+    each such line $x$ extracts a span $x[0:-1]$ (i.e. the entire line $x$).
+\end{example}
+

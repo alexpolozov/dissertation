@@ -1,0 +1,39 @@
+\section{Domain-Specific Language}
+
+\input{dsl-syntax}
+
+A synthesis problem is defined for a given \emph{domain-specific language} (DSL) $\dsl$.
+The language of DSL definitions is given in \Cref{fig:dsldefinition}.
+A DSL is specified as a context-free grammar (CFG), with each nonterminal symbol $N$ defined through a set of
+\emph{rules}.
+Each rule has on its right-hand side an application of an \emph{operator} to some symbols of $\dsl$, and we denote the
+set of all possible operators on the right-hand sides of the rules for $N$ as $\rhs{N}$.
+All symbols and operators are \emph{typed}.
+Every symbol $N$ in the CFG is annotated with a corresponding output type $\tau$, denoted $N\colon \tau$.
+If $N := F(N_1, \dots, N_k)$ is a grammar rule and $N\colon \tau$, then the output type of $F$ must be $\tau$.
+A DSL has a designated \emph{start symbol} $\start{\dsl}$, which is a root nonterminal in the CFG of $\dsl$.
+
+Every (sub-)program $P$ rooted at a symbol $N\colon \tau$ in $\dsl$ maps an \emph{input state}\footnote{DSLs in PBE
+    typically do not involve mutation, so an input $\state$ is technically an \emph{environment}, not a \emph{state}.
+    We keep the term ``state'' for historical reasons.} $\state$ to a value of type $\tau$.
+The execution result of a program $P$ on a state $\state$ is written as $\semantics{P}{\state}$.
+A state is a mapping of free variables $\freeVariables{P}$ to their bound values.
+Variables in a DSL are either explicitly declared as \emph{nonterminal parameters}, or introduced by \texttt{let}
+definitions and $\lambda$-functions.
+The start symbol has a single parameter variable --- an \emph{input symbol} $\inputSymbol{\dsl}$ of the DSL.
+
+Every operator $F$ in a DSL $\dsl$ has some executable semantics.
+Many operators are generic, included in the standard library (\texttt{std}), and typically reused across different DSLs
+(e.g. $\mathsf{Filter}$ and $\mathsf{Map}$ list combinators).
+Others are domain-specific, and defined only for a given DSL.
+Operators are assumed to be deterministic and pure, modulo unobservable side effects.
+
+Symbols and rules may be augmented with multiple custom annotations, such as:
+\begin{itemize}[nosep]
+    \item \dslinline|@start| -- marks the start symbol of a DSL;
+    \item \dslinline|@id['$\text{\rmfamily\slshape\color{Brown} symbol-name}$']| -- gives a designated name to the
+        following rule, which may be used to reference it from the accompanying source code;
+    \item \dslinline|@values[$\text{\rmfamily\slshape member-name}$]| -- specifies a member (e.g. a field, a static
+        variable, a property) in a target language that stores a set of possible values for the given terminal.
+\end{itemize}
+

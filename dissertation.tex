@@ -6,6 +6,9 @@
 \usepackage{textcomp}
 
 % MATH
+% To prevent the ``too many alphabets'' error
+\newcommand{\hmmax}{0}
+\newcommand{\bmmax}{0}
 \usepackage{amsmath, amsthm, amsfonts, amssymb}
 \usepackage{thmtools}
 \usepackage{mathtools}
@@ -37,6 +40,8 @@
 %%% UTILITIES
 \usepackage{import}
 \usepackage{adjustbox}
+\usepackage{mdframed}
+\usepackage{tcolorbox}
 \usepackage{relsize}
 \usepackage{scalerel}
 \usepackage{twoopt}
@@ -44,6 +49,7 @@
 \usepackage{xspace}
 \usepackage{hyphenat}
 \usepackage[xspace]{ellipsis}
+\usepackage{syntax}
 \usepackage[color=red!55, textsize=footnotesize, textwidth=1.3cm,
             shadow, prependcaption, obeyFinal, colorinlistoftodos]{todonotes}
 
@@ -107,6 +113,11 @@
 \usepackage[capitalize]{cleveref}
 \crefname{defn}{definition}{definitions}
 
+%%% FLOATS
+\usetikzlibrary{shadings}
+\tcbuselibrary{raster,skins}
+\tcbset{sharp corners=all, boxrule=0.1mm, colback=black!3!white}
+
 %%% TYPOGRAPHIC SETUP
 \makeatletter
     % Do not hyperlink \citeauthor{}
@@ -151,6 +162,7 @@
 %%% CONTENT
 \textpages
 \subimport{intro/}{main}
+\include{related}
 \subimport{background/}{main}
 \subimport{vsa/}{main}
 \subimport{prose/}{main}
