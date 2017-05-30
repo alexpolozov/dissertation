@@ -53,7 +53,7 @@ Therefore in common (non-degenerate) cases $\volume{\vsa} = \mathcal{O}(\log |\v
 
 \begin{figure}[t]
     \centering
-    \begin{dot2tex}[dot, tikz, options=-ftikz -tmath -c --autosize --usepdflatex --figonly]
+    \begin{dot2tex}[options=--usepdflatex --figonly]
         \input{vsa/vsa.example.dot}
     \end{dot2tex}
     \caption{A VSA representing all possible programs output the string \stringliteral{425} in $\ffdsl$.
@@ -220,7 +220,9 @@ depend not only on $\vsa$ and $\state$, but also on the semantics of the operato
 collisions in their possible output values.
 However, in \Cref{sec:experiments} I show that these values usually remain small for any practical DSL.
 
-\paragraph{VSA as a language}
+\section{VSA as a Language}
+\label{sec:vsa:language}
+
 Another view on a version space algebra is that it is a different representation of a \emph{language}, isomorphic to a
 context-free grammar (CFG).
 In formal logic, a language is defined as a set of programs.
@@ -230,4 +232,3 @@ A VSA is also a representation for a set of programs; it is an AST-based represe
 two syntactic features: \emph{union} ($\vsaunion$) and \emph{join of shared VSAs} ($\joinCons$).
 These representations are isomorphic; in fact, a VSA built from a DSL $\dsl$ is essentially a CFG for some DSL $\dsl'
 \subseteq \dsl$.
-% For instance, if $N = \start{\dsl}$, then the VSA $\vsa = \dsl|_{N}$ is isomorphic to the CFG of $\dsl$.
