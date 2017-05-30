@@ -223,6 +223,30 @@ However, in \Cref{sec:experiments} I show that these values usually remain small
 \section{VSA as a Language}
 \label{sec:vsa:language}
 
+\begin{figure}[t]
+    \uwsinglespace
+    \begin{minipage}[b]{.42\textwidth}
+        \begin{lstlisting}[language=dsl, gobble=12]
+            int $position$[string $s$] :=
+                AbsPos($s$, $k$)
+              | RegexPos($s$, std.Pair($r$, $r$), $k$);
+            int $k$;
+            Regex $r$;
+        \end{lstlisting}
+    \end{minipage}
+    \begin{minipage}[t]{0.5\textwidth}
+        \small
+        \begin{dot2tex}[options=--usepdflatex --figonly]
+            \input{vsa/language-repr.dot}
+        \end{dot2tex}
+    \end{minipage}
+    \caption{
+        A VSA can be seen as an isomorphic representation for a CFG of some sub-language of the original DSL.
+        \emph{Left:} An excerpt from the FlashFill DSL definition.
+        \emph{Right:} A sample VSA that represents a sub-language of the DSL on the top.}
+    \label{fig:vsa:language-repr}
+\end{figure}
+
 Another view on a version space algebra is that it is a different representation of a \emph{language}, isomorphic to a
 context-free grammar (CFG).
 In formal logic, a language is defined as a set of programs.
@@ -232,3 +256,9 @@ A VSA is also a representation for a set of programs; it is an AST-based represe
 two syntactic features: \emph{union} ($\vsaunion$) and \emph{join of shared VSAs} ($\joinCons$).
 These representations are isomorphic; in fact, a VSA built from a DSL $\dsl$ is essentially a CFG for some DSL $\dsl'
 \subseteq \dsl$.
+For instance, \Cref{fig:vsa:language-repr} shows an example of a small DSL (an excerpt from FlashFill) and a VSA that
+represents a finite sub-language of this DSL.
+
+This observation is important because it allows us (with careful implementation) to treat VSAs and CFGs interchangeably.
+Such treatment is the main driver behind seamless \emph{incremental program synthesis} in the PROSE framework, which I
+describe in \Cref{sec:interactive:incremental}.
