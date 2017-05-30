@@ -1,32 +1,35 @@
 digraph VSA {
-	d2toptions = "-ftikz -tmath --autosize --usepdflatex --figonly";
-	node [shape=box, style="rounded corners"];
-	nodesep=.15;
-	rank=same;
-	ranksep=.15;
+    ranksep=0.3;
+    nodesep=0.3;
 
-  	e123 [label="\\vsaunion"];
-  	e12 [label="\\vsaunion"];
-  	e23 [label="\\vsaunion"];
-  	concat12 [label="\\joinCons[\\mathsf{Concat}]", style=""];
-  	concat23 [label="\\joinCons[\\mathsf{Concat}]", style=""];
-  	e1 [label="\\widetilde{e_{1}}"];
-  	e2 [label="\\widetilde{e_{2}}"];
-  	e3 [label="\\widetilde{e_{3}}"];
+    subgraph unions {
+        node [shape=none, label="\\bigvsaunion"];
+        e123; e12; e23;
+    }
 
-  	subgraph rank0 {
-  		rank = same;
-  		concat1o23 [label="\\joinCons[\\mathsf{Concat}]", style=""];
-  		const123 [label="\\widetilde{e_{123}}"];
-  		concat12o3 [label="\\joinCons[\\mathsf{Concat}]", style=""];
+    subgraph joins {
+        node [shape=box, label="\\joinCons[\\mathsf{Concat}]", style="join node"];
+        subgraph rank0 {
+            rank = same;
+            concat1o23; concat12o3;
+            concat1o23 -- concat12o3 [style="draw=none"];
+        };
+        subgraph rank1 {
+            rank = same;
+            concat12; concat23;
+        }
+    }
 
-  		concat1o23 -> const123 -> concat12o3 [style="draw=none"];
-  	};
+    subgraph vsas {
+        node [shape=circle, style="vsa node"];
+        e1 [label="\\vsa_1"];
+        e2 [label="\\vsa_2"];
+        e3 [label="\\vsa_3"];
+        const12 [label="\\vsa_{12}"];
+        const23 [label="\\vsa_{23}"];
+    }
 
-  	const12 [label="\\widetilde{e_{12}}"];
-  	const23 [label="\\widetilde{e_{23}}"];
-
-  	e123 -> concat1o23; e123:s -> const123 [minlen="0.1"]; e123 -> concat12o3;
+  	e123 -> concat1o23; e123 -> concat12o3;
   	concat12o3 -> e12;	concat12o3 -> e3;
   	concat1o23 -> e1; concat1o23 -> e23;
   	e12 -> const12; e12 -> concat12:n;

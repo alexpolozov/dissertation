@@ -289,4 +289,4 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/vim,latex,windows,sublimetext
 
 dissertation.pdf
-
+dissertation-dot2tex*

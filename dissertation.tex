@@ -29,6 +29,17 @@
 \usepackage{graphicx}
 \usepackage[usenames, svgnames]{xcolor}
 \usepackage[hypcap=true]{subcaption}
+\usepackage{dot2texi}
+\usepackage{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{shadings, shapes, arrows}
+\tcbuselibrary{raster, skins}
+\tcbset{sharp corners=all, boxrule=0.1mm, colback=black!3!white}
+\tikzset{
+    every picture/.append style={>=latex},
+    join node/.style={rounded corners, fill=LightGray!70, draw=Gray},
+    vsa node/.style={fill=blue!15, draw=RoyalBlue}
+}
 
 %%% TYPESETTING
 \usepackage[inline]{enumitem}
@@ -41,7 +52,6 @@
 \usepackage{import}
 \usepackage{adjustbox}
 \usepackage{mdframed}
-\usepackage{tcolorbox}
 \usepackage{relsize}
 \usepackage{scalerel}
 \usepackage{twoopt}
@@ -112,11 +122,6 @@
 %%% REFERENCES
 \usepackage[capitalize]{cleveref}
 \crefname{defn}{definition}{definitions}
-
-%%% FLOATS
-\usetikzlibrary{shadings}
-\tcbuselibrary{raster,skins}
-\tcbset{sharp corners=all, boxrule=0.1mm, colback=black!3!white}
 
 %%% TYPOGRAPHIC SETUP
 \makeatletter

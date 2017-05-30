@@ -53,7 +53,9 @@ Therefore in common (non-degenerate) cases $\volume{\vsa} = \mathcal{O}(\log |\v
 
 \begin{figure}[t]
     \centering
-    \input{vsa.example}
+    \begin{dot2tex}[dot, tikz, options=-ftikz -tmath -c --autosize --usepdflatex --figonly]
+        \input{vsa/vsa.example.dot}
+    \end{dot2tex}
     \caption{A VSA representing all possible programs output the string \stringliteral{425} in $\ffdsl$.
     Leaf nodes $\vsa_1, \vsa_2, \vsa_3, \vsa_{12}, \vsa_{23}$ are VSAs representing all ways to output substrings
     \stringliteral{4}, \stringliteral{2}, \stringliteral{5}, \stringliteral{42}, and \stringliteral{25} respectively
