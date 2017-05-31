@@ -3,44 +3,45 @@
 \todoinline{Wrap all big figures in \texttt{\textbackslash begin\{fullpage\}}.}
 \todoinline{Mark all \textbf{(a)}, \textbf{(b)}, \dots\ as subfigures with hyperlinks.}
 
-\begin{figure*}[t]
-    \centering
-    \uwsinglespace
-    \small
-    \hfill\textbf{(a)}
-    \vspace{-0.8\baselineskip}
-    \begin{algorithmic}
-        \Function{GenerateSubstring}{$\sigma$: Input state, $s$: String}
+\begin{figure}[p!]
+    \begin{fullpage}
+        \centering
+        \uwsinglespace
+        \small
+        \hfill\textbf{(a)}
+        \vspace{-0.8\baselineskip}
+        \begin{algorithmic}
+            \Function{GenerateSubstring}{$\sigma$: Input state, $s$: String}
             \State $result \gets \emptyset$
             \ForAll{\hlc{ $(i, k)$ s.t. $s$ is substring of $\sigma(v_i)$ at position $k$ }}
             \State $Y_1 \gets$ \Call{GeneratePosition}{\hlc{$\sigma(v_i), k$}}
-                \State $Y_1 \gets$ \Call{GeneratePosition}{\hlc{$\sigma(v_i), k + \mathsf{Length}(s)$}}
-                \State $result \gets result \cup \left\{\mathtt{SubStr}(v_i, Y_1, Y_2)\right\}$
+            \State $Y_1 \gets$ \Call{GeneratePosition}{\hlc{$\sigma(v_i), k + \mathsf{Length}(s)$}}
+            \State $result \gets result \cup \left\{\mathtt{SubStr}(v_i, Y_1, Y_2)\right\}$
             \EndFor
             \State \Return $result$
-        \EndFunction
+            \EndFunction
 
-        \Function{GeneratePosition}{$s$: String, $k$: int}
+            \Function{GeneratePosition}{$s$: String, $k$: int}
             \State $result \gets \left\{\mathtt{CPos}(\hlc{$k$}), \mathtt{CPos}(\hlc{$-(\mathsf{Length}(s)-k)$})\right\}$
             \ForAll{\hlc{$r_1 = \mathtt{TokenSeq}(T_1, \dots, T_n)$ matching $s[k_1 : k-1]$ for some $k_1$}}
-                \ForAll{\hlc{$r_2 = \mathtt{TokenSeq}(T'_1, \dots, T'_m)$ matching $s[k : k_2]$ for some $k_2$}}
-                \State \hlc{$r_{12} \gets \mathtt{TokenSeq}(T_1, \dots, T_n, T'_1, \dots, T'_m)$}
-                \State \hlc{Let $c$ be s.t. $s[k_1 : k_2]$ is the $c^{\text{th}}$ match for $r_{12}$ in $s$}
-                    \State \hlc{Let $c'$ be the total number of matches for $r_{12}$ in $s$}
-                    \State $\tilde{r_1} \gets$ \Call{GenerateRegex}{$r_1, s$}
-                    \State $\tilde{r_2} \gets$ \Call{GenerateRegex}{$r_2, s$}
-                    \State $result \gets result \cup \left\{\mathtt{Pos}(\tilde{r_1}, \tilde{r_2}, \left\{\hlc{$c$}, \hlc{$-(c'-c+1)$}\right\})\right\}$
-                \EndFor
+            \ForAll{\hlc{$r_2 = \mathtt{TokenSeq}(T'_1, \dots, T'_m)$ matching $s[k : k_2]$ for some $k_2$}}
+            \State \hlc{$r_{12} \gets \mathtt{TokenSeq}(T_1, \dots, T_n, T'_1, \dots, T'_m)$}
+            \State \hlc{Let $c$ be s.t. $s[k_1 : k_2]$ is the $c^{\text{th}}$ match for $r_{12}$ in $s$}
+            \State \hlc{Let $c'$ be the total number of matches for $r_{12}$ in $s$}
+            \State $\tilde{r_1} \gets$ \Call{GenerateRegex}{$r_1, s$}
+            \State $\tilde{r_2} \gets$ \Call{GenerateRegex}{$r_2, s$}
+            \State $result \gets result \cup \left\{\mathtt{Pos}(\tilde{r_1}, \tilde{r_2}, \left\{\hlc{$c$}, \hlc{$-(c'-c+1)$}\right\})\right\}$
+            \EndFor
             \EndFor
             \State \Return $result$
-        \EndFunction
-    \end{algorithmic}
-    \vspace{5pt}
-    \hrule
-    \vspace{3pt}\hfill\textbf{(b)}
-    \vspace{-0.9\baselineskip}
-    \begin{algorithmic}
-        \Function{Map.Learn}{Examples $\spec$: $\mathsf{Dict}\langle \mathsf{State}, \mathsf{List}\langle T\rangle\rangle$}
+            \EndFunction
+        \end{algorithmic}
+        \vspace{5pt}
+        \hrule
+        \vspace{3pt}\hfill\textbf{(b)}
+        \vspace{-0.9\baselineskip}
+        \begin{algorithmic}
+            \Function{Map.Learn}{Examples $\spec$: $\mathsf{Dict}\langle \mathsf{State}, \mathsf{List}\langle T\rangle\rangle$}
             \State Let $\spec$ be $\left\{\state_1 \mapsto Y_1, \dots, \state_m \mapsto Y_m\right\}$
             \For{$j \gets 1\dots m$}
             \State Witness subsequence \hlc{$Z_j \gets \mathsf{Map.Decompose}(\state_j, Y_j)$}
@@ -50,21 +51,204 @@
             \State $\spec_2 \gets$ \hlc{$\left\{\state_j \mapsto Z_j \mid j = 1..m\right\}$}
             \State $\vsa_2 \gets S.\mathsf{Learn}(\spec_2)$
             \State \Return $\mathsf{Map}(\vsa_1, \vsa_2)$
-        \EndFunction
-        \\
-        \Function{Filter.Learn}{Examples $\spec$: $\mathsf{Dict}\langle \mathsf{State}, \mathsf{List}\langle T\rangle\rangle$}
+            \EndFunction
+            \\
+            \Function{Filter.Learn}{Examples $\spec$: $\mathsf{Dict}\langle \mathsf{State}, \mathsf{List}\langle T\rangle\rangle$}
             \State $\vsa_1 \gets S.\mathsf{Learn}(\hlc{$\spec$})$
             \State $\spec' \gets$ \hlc{$\bigl\{ \state[Y[i]/x] \mapsto \mathsf{true} \mid (\state, Y) \in \spec,\, i = 0..|Y|-1\bigr\}$}
             \State $\vsa_2 \gets F.\mathsf{Learn}(\spec')$
             \State \Return $\mathsf{Filter}(\vsa_2, \vsa_1)$
-        \EndFunction
-    \end{algorithmic}
-    \vspace{3pt}
-    \caption{\textbf{(a)} FlashFill synthesis algorithm for learning substring expressions \cite[Figure 7]{flashfill};
-        \textbf{(b)} FlashExtract synthesis algorithm for learning $\mathsf{Map}$ and $\mathsf{Filter}$ sequence
-        expressions \cite[Figure 6]{flashextract}.
-        Highlighted portions correspond to domain-specific computations, which deduce I/O examples for propagation in
-        the DSL by ``inverting'' the semantics of the corresponding DSL operator.
+            \EndFunction
+        \end{algorithmic}
+        \vspace{3pt}
+        \caption{\textbf{(a)} FlashFill synthesis algorithm for learning substring expressions \cite[Figure 7]{flashfill};
+            \textbf{(b)} FlashExtract synthesis algorithm for learning $\mathsf{Map}$ and $\mathsf{Filter}$ sequence
+            expressions \cite[Figure 6]{flashextract}.
+            Highlighted portions correspond to domain-specific computations, which deduce I/O examples for propagation in
+            the DSL by ``inverting'' the semantics of the corresponding DSL operator.
         Non-highlighted portions correspond to the search organization, isomorphic between FlashFill and FlashExtract.}
-    \label{fig:prose:prior}
-\end{figure*}
+        \label{fig:prose:prior}
+    \end{fullpage}
+\end{figure}
+
+The main observation behind PROSE is that most of prior synthesis algorithms in PBE can be decomposed into
+\begin{enumerate*}[label=\textbf{(\alph*)}]
+    \item domain-specific insights for refining a spec for the operator into the specs for its
+        parameters, and
+    \item a common deductive search algorithm, which leverages these insights for iterative reduction of the synthesis
+        problem
+\end{enumerate*}.
+
+For instance, \Cref{fig:prose:prior} shows a portion of the synthesis algorithms for FlashFill \cite[Figure
+7]{flashfill} and FlashExtract~\cite[Figure 6]{flashextract}.
+Both algorithms use a divide-and-conquer approach, reducing a synthesis problem for an expression into smaller synthesis
+problems for its subexpressions.
+They alternate between three phases, implicitly hidden in the ``fused'' original presentation:
+\begin{enumerate}[nosep]
+    \item Given some examples for a nonterminal $N$, invoke synthesis on all RHS rules of $N$, and unite the results.
+    \item \emph{Deduce} examples that should be propagated to some argument $N_j$ of a current rule $N := F(N_1, \dots,
+        N_k)$.
+    \item Invoke learning recursively on the deduced examples, and proceed to phase 2 for the subsequent arguments.
+\end{enumerate}
+Note that phases 1 and 3 do not exploit the \emph{semantics} of the DSL, they only process its \emph{structure}.
+In contrast, phase 2 uses domain-specific knowledge to deduce propagated examples for $N_j$ from the examples for $N$.
+In \Cref{fig:prose:prior}, we highlight parts of the code that implement phase 2.
+
+It is important that phases 2 and 3 interleave as nested loops for each argument $N_j$ of the currently synthesized
+rule, because the examples deduced for an argument $N_{j}$ may depend on the possible value of the
+previously processed argument $N_{j-1}$.
+For instance, the example positions $k$, deduced for the nonterminal $p$ in \textsc{GenerateSubstring}, depend on the
+currently selected possible input string $v_i$.
+
+In FlashExtract, list processing operators $\mathsf{Map}(F, S)$ and $\mathsf{Filter}(F, S)$ are learned generically from
+a similar \emph{subsequence spec} $\spec$ of type $\{ \state \tospec \textbf{?} \sqsupseteq
+\mathsf{List}\langle T\rangle \}$.
+Their learning algorithms are also shown in \Cref{fig:prose:prior}.
+Similarly, they are organized in the ``divide-and-conquer'' manner, wherein the given spec is first transformed
+into the corresponding parameter specs, and then the synthesis on them is invoked recursively.
+FlashExtract provides generic synthesis for five such list\hyp{}processing operators independently of their DSL
+instantiations.
+However, the domain-specific insight required to build a spec for the $\mathsf{Map}$'s $F$ parameter depends on
+the specific DSL instantiation of this $\mathsf{Map}$ (such as $\mathsf{LinesMap}$ or $\mathsf{StartSeqMap}$ in
+$\fedsl$), and cannot be implemented in a domain-independent manner.
+This insight was originally called a \emph{witness function} -- it \emph{witnessed} sequence elements passed to $F$.
+We notice, however, that FlashExtract witness functions are just instances of domain-specific knowledge that
+appears in phase~2 of the common meta-algorithm for inductive synthesis.
+
+\subsection{Derivation}
+Consider the operator $\mathsf{LinesMap}(F, L)$ in $\fedsl$ (see \Cref{fig:dsl:flashfill}).
+It takes as input a \mbox{(sub-)sequence} of lines $L$ in the document, and applies a function $F$ on each line in $L$,
+which selects some substring within a given line.
+Thus, the simplest type signature of $\mathsf{LinesMap}$ is \mbox{$\left((\mathsf{String} \!\to\!
+\mathsf{String}),\, \mathsf{List}\langle\mathsf{String}\rangle\right) \to \mathsf{List}\langle \mathsf{String}
+    \rangle$}.
+
+The simplest form of \Cref{problem:syn:general} for $\mathsf{LinesMap}$ is \emph{``Learn all programs of kind
+    $\mathsf{LinesMap}(F, L)$ that satisfy a given I/O example $\spec = \state \rightsquigarrow v$''}.
+Here $v$ is an output value, i.e. a list of extracted strings.
+To solve this problem, we need to compute the following set of expressions:
+\begin{equation}
+    \left\{\left(F, L\right) \mid \mathsf{LinesMap}(F, L) \models \spec \right\}
+    \label{eqn:derivation:problem}
+\end{equation}
+Applying the principle of divide-and-conquer, in order to solve \eqref{eqn:derivation:problem}, we can compute an
+\emph{inverse semantics} of $\mathsf{LinesMap}$:
+\begin{equation}
+    \mathsf{LinesMap}^{\inv}(v) \bydef \left\{(f, \ell) \mid \mathsf{LinesMap}(f, \ell) = v\right\}
+    \label{eqn:derivation:inverse}
+\end{equation}
+Then, we can recursively learn all programs $F$ and $L$ that evaluate to $f$ and $\ell$ respectively on the input state
+$\state$.
+
+\paragraph{Finitization}
+Computation of $\mathsf{LinesMap}^{\inv}(v)$ is challenging.
+One possible approach could be to enumerate all argument values $f \in \codomain F$, $\ell \in \codomain L$, retaining
+only those for which $\mathsf{LinesMap}(f, \ell) = v$.
+However, both $\codomain L$ (all string lists) and $\codomain F$ (all $\mathsf{String} \to \mathsf{String}$ functions)
+are infinite.\footnote{%
+    Here $\codomain F$ denotes the \emph{codomain} of an operator $F$, i.e. the set of its possible outputs.
+}
+
+In order to finitize the value space, we apply domain-specific knowledge about the behavior of $\mathsf{LinesMap}$ in
+$\fedsl$.
+Namely, we use that $L$ must evaluate to a sequence of lines in the input document, and~$F$ must evaluate to a function
+that selects a subregion in a given line.
+Thus, the ``strongly-typed'' signature of $\mathsf{LinesMap}$ is actually $((\mathsf{Line} \!\to\!
+\mathsf{StringRegion}),\,
+\mathsf{List}\langle \mathsf{Line}\rangle) \to \mathsf{List}\langle \mathsf{StringRegion}\rangle$
+where $\mathsf{StringRegion}$ is a domain-specific type for ``a region within a given document''.
+This is a \emph{dependent type}, parameterized by the state $\state$ that contains our input document.
+Thus, the inverse semantics $\mathsf{LinesMap}^{\inv}$ is also implicitly parameterized with $\sigma$:
+\begin{equation*}
+    \mathsf{LinesMap}^{\inv}(\state \rightsquigarrow v) =
+    \left\{(f, \ell) \mid
+        f \text{ and } \ell \text{ can be obtained from } \state \ \wedge\ \mathsf{LinesMap}(f, \ell) = v
+    \right\}
+\end{equation*}
+
+Our implementation of $\mathsf{LinesMap}^{\inv}(\state \rightsquigarrow v)$ now enumerates over all line sequences
+$\ell$ and substring functions $f$ \emph{given an input document}.
+Both codomains are finite.
+Note that we took into account both input and output in the spec to produce a constructive synthesis procedure.
+
+\paragraph{Decomposition}
+The synthesis procedure above is finite, but not necessarily efficient.
+For most values of~$\ell$, there may be no satisfying program $L$ in the DSL to produce it, and therefore even
+computing matching values of $f$ for it is redundant.
+For instance, let $v = [r_1, r_2]$.
+In this case $\ell$ must be the list of two document lines $[l_1, l_2]$ containing $r_1$ and $r_2$, respectively; any
+other value for $\ell$ cannot yield $v$ as an output of $\mathsf{LinesMap}(f, \ell)$ regardless of $f$.
+In general, \emph{for many domain-specific operators $F(X, Y)$ computing all viable
+arguments $(x, y)$ is much slower than computing matching $y$s only for the realizable values of $X$}.
+
+This observation leads to another key idea in PROSE: \emph{decomposition} of inverse semantics.
+Namely, for our $\mathsf{LinesMap}$ example, instead of computing $\mathsf{LinesMap}^{\inv}(\state \rightsquigarrow v)$
+explicitly, we ask two simpler questions separately:
+\begin{enumerate}[nosep]
+    \item If $\semantics{\mathsf{LinesMap}(F, L)}{\state} = v$, what could be the possible output of $L$?
+    \item If $\semantics{\mathsf{LinesMap}(F, L)}{\state} = v$ and we know that $\semantics{L}{\state} = \ell$, what
+        could be the possible output of $F$?
+\end{enumerate}
+The answers to these questions define, respectively, \emph{partial} and \emph{conditional} inverse semantics of
+$\mathsf{LinesMap}$ with respect to its individual parameters:
+\begingroup\allowdisplaybreaks
+\begin{align}
+    \mathsf{LinesMap}^{\inv}_L(v) \ &\supset\ \left\{ \ell \mid \exists f\colon \mathsf{LinesMap}(f, \ell) = v \right\}
+    \label{eqn:derivation:inverse} \\
+    \mathsf{LinesMap}^{\inv}_F (v \assuming L = \ell) \ &=\ \left\{ f \mid \mathsf{LinesMap}(f, \ell) = v \right\}
+    \label{eqn:derivation:conditional}
+\end{align}
+\endgroup
+
+The key insight of this technique is that, by the principle of \emph{skolemization}~\cite{modeltheory}, inverse
+semantics
+$\mathsf{LinesMap}^{\inv}(v)$ can be expressed as a cross-product computation of parameter inverses
+$\mathsf{LinesMap}^{\inv}_L(v)$ and $\mathsf{LinesMap}^{\inv}_F(v \assuming L = \ell)$ for all possible $\ell \in
+\mathsf{LinesMap}^{\inv}_L(v)$:
+\begin{gather}
+    \begin{aligned}
+        \mathsf{LinesMap}^{\inv}(v) = &\left\{(f, \ell) \mid \mathsf{LinesMap}(f, \ell) = v\right\} \\
+        = &\left\{(f, \ell) \mid \ell \in \mathsf{LinesMap}^{\inv}(v), f \in \mathsf{LinesMap}^{\inv}_F(v \assuming L = \ell)\right\}
+    \end{aligned}
+    \label{eqn:derivation:united}
+    \raisetag{2\baselineskip}
+\end{gather}
+Such a decomposition naturally leads to an efficient synthesis procedure for solving the problem
+\mbox{$\mathsf{Learn}(\mathsf{LinesMap}(F, L),\ \state \rightsquigarrow v)$}, based on a divide-and-conquer
+algorithmic paradigm:
+\begin{enumerate}[nosep]
+    \item Enumerate  $\ell \in \mathsf{LinesMap}_L^\inv (v)$.
+    \item For each $\ell$ recursively find a set of programs $\vsa_{\ell}$ rooted at $L$ such that
+        $\semantics{L}{\state} = \ell$.
+    \item Enumerate  $f \in \mathsf{LinesMap}_F^\inv (v \assuming L = \ell)$ for all those $\ell$ for which the program
+        set $\vsa_{\ell}$ is non-empty.
+    \item For each $f$ recursively find a set of programs $\vsa_{\ell,f}$ rooted at $F$ such that $\semantics{F}{\state}
+        = f$.
+    \item Now, for any such combination of parameter programs $L \in \vsa_{\ell}$, $F \in \vsa_{\ell,f}$ we guarantee
+        \mbox{$\mathsf{LinesMap}(F, L) \models \spec$} by construction.
+\end{enumerate}
+
+\paragraph{Generalization}
+In practice, \Cref{problem:syn:general} for $\mathsf{LinesMap}$ is rarely solved for example-based specs: as
+discussed in \Cref{sec:background:spec}, providing the entire output $v$ of regions selected by $\mathsf{LinesMap}$ is
+impractical for end users.
+Thus, instead of concrete outputs the procedure above should manipulate \emph{specs with properties
+    of concrete outputs} (e.g.  a prefix of the output list $v$ instead of entire $v$).
+A corresponding generalization of ``inverse semantics of $\mathsf{LinesMap}$'' is a function that deduces a
+spec for $L$ given a spec $\spec$ on $\mathsf{LinesMap}(F,\,L)$ (or for $F$, under the assumption of fixed $L$).
+We call such a generalization a \emph{witness function}.
+
+In our $\mathsf{LinesMap}$ example, a user might provide a \emph{prefix specification} \mbox{$\spec = \{ \state
+\tospec [r_1, r_2, \dots] \}$} for the output list of regions.
+The witness functions for such a spec arise naturally:
+\begin{itemize}
+    \item A witness function for $L$ in this case follows the same observation above: the output list of $L$ should
+        begin with two lines containing $r_1$ and $r_2$.
+        This is also a prefix specification.
+    \item A witness function for $F$ (conditional on $\ell$, the output value of $L$) is universal for all
+        $\mathsf{Map}$s: it requires the output of $F$ to be a function that maps the $i^{\text{th}}$ element of $\ell$
+        into the $i^{\text{th}}$ element of $[r_1, r_2]$.
+        Such modularity of synthesis (a common witness function for any domain-specific $\mathsf{Map}$ operator) is
+        another advantage of decomposing inverse semantics into partial and conditional witness functions.
+\end{itemize}
+
