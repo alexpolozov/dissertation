@@ -1,2 +1,23 @@
 \chapter{The \PROSE Framework}
 \label{ch:prose}
+
+In this section, I describe the methodology of program synthesis the \PROSE framework: \emph{deductive synthesis
+driven by domain-specific witness functions}.
+I first introduce the notion of witness functions informally in \Cref{sec:prose:intuition}, deriving it from various
+instances of prior work in PBE (such as FlashFill and FlashExtract).
+Then, in \Cref{sec:prose:wf}, I give a formal definition of witness functions, as well as a comprehensive review of
+their usage in PROSE-based PBE technologies.
+\Cref{sec:prose:algorithm} presents the main synthesis algorithm of PROSE, \emph{deductive search}.\footnote{Also known
+    in the literature as \emph{divide-and-conquer search}, \emph{top-down search}, and \emph{backpropagation-based
+    search} (not to be confused with the backpropagation algorithm for training neural
+    networks~\cite{chauvin1995backpropagation}, although this name was inspired by similarities between the two
+techniques).}
+In \Cref{sec:prose:evaluation}, I show its evaluation on 12+ real-life case studies -- PBE technologies developed on top
+of the framework.
+Finally, \Cref{sec:prose:discussion} discusses various limitations and extensions to the algorithm.
+
+\input{intuition}
+\input{wf}
+\input{algorithm}
+\input{evaluation}
+\input{discussion}

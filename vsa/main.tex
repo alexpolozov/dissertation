@@ -227,7 +227,7 @@ However, in \Cref{sec:experiments} I show that these values usually remain small
     \uwsinglespace
     \begin{minipage}[b]{.42\textwidth}
         \begin{lstlisting}[language=dsl, gobble=12]
-            int $position$[string $s$] :=
+            int $position$[string $s$] $\coloneqq$
                 AbsPos($s$, $k$)
               | RegexPos($s$, std.Pair($r$, $r$), $k$);
             int $k$;

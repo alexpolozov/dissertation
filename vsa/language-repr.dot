@@ -1,0 +1,40 @@
+digraph G {
+    rankdir=LR;
+    ranksep=0.25;
+    nodesep=0.20;
+
+    union [label="\\bigvsaunion", shape=none];
+
+    subgraph joins {
+        node [shape=box, style="join node"];
+
+        subgraph rank0 {
+            rank=same;
+            abs [label="\\joinCons[\\mathsf{AbsPos}]"];
+            regex [label="\\joinCons[\\mathsf{RegexPos}]"];
+        }
+    }
+
+    union:n -> abs:w;
+    union:s -> regex:w;
+    regex:e -> pair:w;
+
+    node [shape=none];
+    l011 [label="\\{0, 1, -1, -10\\}"];
+    s;
+    pair [label="\\joinCons[\\mathsf{Pair}]", shape=box, style="join node"];
+    l115 [label="\\{1, -1, 5\\}"];
+    subgraph rank3 {
+        rank=same;
+        r1 [label="\\{\\mathsf{Word}, \\mathsf{Comma}\\}"];
+        r2 [label="\\{\\mathsf{Number}\\}"];
+    }
+
+    regex:n -> s:w;
+    regex:s -> l115:w;
+    abs:e -> s:w;
+    abs:n -> l011:w;
+
+    pair:n -> r1:w;
+    pair:s -> r2:w;
+}

@@ -21,3 +21,9 @@ this work.
     \end{itemize}
     We discuss all these specific problems and their implementation in the PROSE framework in the following sections.
 \end{problem}
+
+By definition, any algorithm for solving \Cref{problem:syn:general} must be \emph{sound} --- every program in its
+returned program set $\vsa$ must satisfy $\spec$.
+A synthesis algorithm is said to be \emph{complete} if it learns \emph{all possible} programs in $\dsl$ that satisfy $\spec$.
+Since $\dsl$ is usually infinite because of unrestricted constants and recursion, completeness is usually defined w.r.t.
+some finitization of $\dsl$ (possibly dependent on a given synthesis problem).
