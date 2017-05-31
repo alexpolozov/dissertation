@@ -25,13 +25,13 @@ Hereinafter I use the words ``program set'' and ``version space algebra'' interc
 \begin{defn}[Version space algebra]
     \label{def:vsa}
     Let $\dsl$ be a DSL.
-    A \emph{version space algebra} is a representation for a set $\vsa$ of programs rooted at the same symbol of $\dsl$.
-    The grammar of VSAs is:
+    A \emph{version space algebra} is a representation for a set $\vsa$ of programs rooted at the same symbol of $\dsl$,
+    with the following grammar:
     \begin{align*}
-        \vsa \is \left\{P_1, \dots, P_k\right\} \palt \vsaunion(\vsa_1, \dots, \vsa_k) \palt \joinCons(\vsa_1, \dots, \vsa_k)
+        \vsa \is \left\{P_1, \dots, P_k\right\} \,\palt\, \vsaunion(\vsa_1, \dots, \vsa_k) \,\palt\, \joinCons(\vsa_1, \dots, \vsa_k)
     \end{align*}
     where $F$ is any $k$-ary operator in $\dsl$.
-    The semantics of VSA as a set of programs is given as follows:
+    The semantics of VSA as a set of programs is as follows:
     \begin{align*}
         &P \in \left\{P_1, \dots P_k\right\} \tag*{if $\exists\, j\colon P = P_j$} \\
         &P \in \vsaunion(\vsa_1, \dots, \vsa_k) \tag*{if $\exists\, j\colon P \in \vsa_j$} \\
@@ -46,14 +46,22 @@ Hereinafter I use the words ``program set'' and ``version space algebra'' interc
 \end{defn}
 
 Note that programs in a VSA can benefit from two kinds of sharing of common subexpressions.
-One sharing happens via join VSA nodes, which succinctly represent a cross product of possible subexpression combinations.
-Another sharing happens by virtue of having multiple incoming edges into a VSA node (i.e. two identical program sets are represented
-with one VSA instance in memory).
+One sharing happens via join VSA nodes, which succinctly represent a cross product of possible subexpression
+combinations.
+Another sharing happens by virtue of having multiple incoming edges into a VSA node (i.e. two identical program sets are
+represented with one VSA instance in memory).
 Therefore in common (non-degenerate) cases $\volume{\vsa} = \mathcal{O}(\log |\vsa|)$.
+
+\begin{example}
+    \Cref{fig:ex:vsa} shows a VSA of all FlashFill programs that output the string \stringliteral{425} on a given input state
+    $\state = \left\{ v_1 \mapsto \stringliteral{(425) 555-7709}\right\}$.
+    The string \stringliteral{425} can be represented in four possible ways as a concatenation of individual substrings.
+    Each substring of \stringliteral{425} can be produced by a \textsf{ConstStr} program or a \textsf{SubStr} program.
+\end{example}
 
 \begin{figure}[t]
     \centering
-    \uwsinglespace
+    % \uwsinglespace
     \begin{dot2tex}[options=--usepdflatex --figonly]
         \input{vsa/vsa.example.dot}
     \end{dot2tex}
@@ -64,13 +72,6 @@ Therefore in common (non-degenerate) cases $\volume{\vsa} = \mathcal{O}(\log |\v
     \label{fig:ex:vsa}
 \end{figure}
 
-\begin{example}
-    \Cref{fig:ex:vsa} shows a VSA of all FlashFill programs that output the string \stringliteral{425} on a given input state
-    $\state = \left\{ v_1 \mapsto \stringliteral{(425) 555-7709}\right\}$.
-    The string \stringliteral{425} can be represented in four possible ways as a concatenation of individual substrings.
-    Each substring of \stringliteral{425} can be produced by a \textsf{ConstStr} program or a \textsf{SubStr} program.
-\end{example}
-
 I define three operations over VSAs, which are used during the synthesis process: \emph{intersection},
 \emph{ranking}, and \emph{clustering}.
 Intersection of VSAs was first used by Lau et al.~\cite{lau:smartedit} and then adapted by us for FlashFill~\cite{flashfill}.
@@ -79,8 +80,10 @@ In this section, I define VSA intersection generically, and also introduce ranki
 novel contributions of this thesis.
 
 \section{Intersection}
-Intersection of VSAs enables quick unification of two sets of candidate programs that are consistent with two different specifications.
-Given a conjunctive spec $\spec_1 \wedge \spec_2$, one possible synthesis approach is to learn a set of programs $\vsa_1$ consistent with
+Intersection of VSAs enables quick unification of two sets of candidate programs that are consistent with two different
+specs.
+Given a conjunctive spec $\spec_1 \wedge \spec_2$, one possible synthesis approach is to learn a set of programs
+$\vsa_1$ consistent with
 $\spec_1$, another set of programs $\vsa_2$ consistent with $\spec_2$, and then intersect $\vsa_1$ with $\vsa_2$.
 An efficient algorithm for VSA intersection follows the ideas of automata intersection \cite{hopcroft1979introduction}.
 
@@ -113,8 +116,8 @@ An efficient algorithm for VSA intersection follows the ideas of automata inters
 \end{proof}
 
 \section{Ranking}
-Ranking of VSAs enables us to quickly select the topmost-ranked programs in a set of ambiguous candidates with respect to some
-domain-specific ranking function.
+Ranking of VSAs enables us to quickly select the topmost-ranked programs in a set of ambiguous candidates with respect
+to some domain-specific ranking function.
 
 \begin{defn}[Ranking of a VSA]
     Given a VSA $\vsa$, a ranking function $\rank\colon\dsl\to\Reals$, and an integer $k \ge 1$, the operation
@@ -200,13 +203,15 @@ where $\state_1,\dots,\state_k$ are input states passed by $F$ into its argument
     \bigl\{ v \mapsto \bigvsaunion\limits_{v \mapsto \vsa_j} \vsa_j \bigmid \text{all unique } v \text{ among } v_j \bigr\}
 \end{align*}
 is a ``group-by'' function.
-It groups a set of bindings by keys, uniting VSAs for equal keys with a $\vsaunion$ constructor.
+It groups a given set of bindings by keys, uniting VSAs that correspond to the same key with a $\vsaunion$
+constructor.
 
 The clustering operation allows us to answer many questions about the current set of candidate programs efficiently.
-For example, it allows us to efficiently filter out the programs in $\vsa$ that are inconsistent with a given specification:
+For example, it allows us to efficiently filter out the programs in $\vsa$ that are inconsistent with a given spec:
 \begin{defn}[Filtered VSA]
     Given a VSA $\vsa$ and a spec $\spec$ on $N$, a \emph{filtered VSA} $\mathsf{Filter}(\vsa, \spec)$ is defined as
     follows: $\mathsf{Filter}(\vsa, \spec) \bydef \bigl\{P \in \vsa \mid P \models \spec\bigr\}$.
+    \label{def:vsa:filtered}
 \end{defn}
 \begin{theorem}
     If $\states$ is a state tuple associated with $\spec$, then:
@@ -217,6 +222,9 @@ For example, it allows us to efficiently filter out the programs in $\vsa$ that 
             $\mathcal{O}\bigl(\bigl|\clustering[\vsa][\states]\bigr|\bigr)$ time after the clustering.
     \end{enumerate}
 \end{theorem}
+\begin{proof}
+    Follows by construction from \Cref{def:vsa:filtered}.
+\end{proof}
 
 Estimating the size of $\clustering[\vsa][\states]$ and the running time of clustering is difficult, since these values
 depend not only on $\vsa$ and $\state$, but also on the semantics of the operators in $\dsl$ and the number of
@@ -227,8 +235,8 @@ However, in \Cref{sec:experiments} I show that these values usually remain small
 \label{sec:vsa:language}
 
 \begin{figure}[t]
-    \uwsinglespace
-    \begin{minipage}[b]{.42\textwidth}
+    \begin{minipage}[b]{0.42\textwidth}
+        \uwsinglespace
         \begin{lstlisting}[language=dsl, gobble=12]
             int $position$[string $s$] $\coloneqq$
                 AbsPos($s$, $k$)
@@ -237,12 +245,14 @@ However, in \Cref{sec:experiments} I show that these values usually remain small
             Regex $r$;
         \end{lstlisting}
     \end{minipage}
-    \begin{minipage}[t]{0.5\textwidth}
+    \hspace*{-5pt}
+    \begin{minipage}[t]{0.577\textwidth}
         \small
         \begin{dot2tex}[options=--usepdflatex --figonly]
             \input{vsa/language-repr.dot}
         \end{dot2tex}
     \end{minipage}
+    \vspace*{-\baselineskip}
     \caption{
         A VSA can be seen as an isomorphic representation for a CFG of some sub-language of the original DSL.
         \emph{Left:} An excerpt from the FlashFill DSL definition.

@@ -1,7 +1,6 @@
 \section{Intuition}
 \label{sec:prose:intuition}
-\todoinline{Wrap all big figures in \texttt{\textbackslash begin\{fullpage\}}.}
-\todoinline{Mark all \textbf{(a)}, \textbf{(b)}, \dots\ as subfigures with hyperlinks.}
+% \todoinline{Mark all \textbf{(a)}, \textbf{(b)}, \dots\ as subfigures with hyperlinks.}
 
 \begin{figure}[p!]
     \begin{fullpage}
@@ -194,7 +193,7 @@ $\mathsf{LinesMap}$ with respect to its individual parameters:
 \begingroup\allowdisplaybreaks
 \begin{align}
     \mathsf{LinesMap}^{\inv}_L(v) \ &\supset\ \left\{ \ell \mid \exists f\colon \mathsf{LinesMap}(f, \ell) = v \right\}
-    \label{eqn:derivation:inverse} \\
+    \label{eqn:derivation:partial} \\
     \mathsf{LinesMap}^{\inv}_F (v \assuming L = \ell) \ &=\ \left\{ f \mid \mathsf{LinesMap}(f, \ell) = v \right\}
     \label{eqn:derivation:conditional}
 \end{align}
@@ -238,7 +237,7 @@ A corresponding generalization of ``inverse semantics of $\mathsf{LinesMap}$'' i
 spec for $L$ given a spec $\spec$ on $\mathsf{LinesMap}(F,\,L)$ (or for $F$, under the assumption of fixed $L$).
 We call such a generalization a \emph{witness function}.
 
-In our $\mathsf{LinesMap}$ example, a user might provide a \emph{prefix specification} \mbox{$\spec = \{ \state
+In our $\mathsf{LinesMap}$ example, a user might provide a \emph{prefix spec} \mbox{$\spec = \{ \state
 \tospec [r_1, r_2, \dots] \}$} for the output list of regions.
 The witness functions for such a spec arise naturally:
 \begin{itemize}
