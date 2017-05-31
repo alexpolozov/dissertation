@@ -1,2 +1,70 @@
 \section{Intuition}
 \label{sec:prose:intuition}
+\todoinline{Wrap all big figures in \texttt{\textbackslash begin\{fullpage\}}.}
+\todoinline{Mark all \textbf{(a)}, \textbf{(b)}, \dots\ as subfigures with hyperlinks.}
+
+\begin{figure*}[t]
+    \centering
+    \uwsinglespace
+    \small
+    \hfill\textbf{(a)}
+    \vspace{-0.8\baselineskip}
+    \begin{algorithmic}
+        \Function{GenerateSubstring}{$\sigma$: Input state, $s$: String}
+            \State $result \gets \emptyset$
+            \ForAll{\hlc{ $(i, k)$ s.t. $s$ is substring of $\sigma(v_i)$ at position $k$ }}
+            \State $Y_1 \gets$ \Call{GeneratePosition}{\hlc{$\sigma(v_i), k$}}
+                \State $Y_1 \gets$ \Call{GeneratePosition}{\hlc{$\sigma(v_i), k + \mathsf{Length}(s)$}}
+                \State $result \gets result \cup \left\{\mathtt{SubStr}(v_i, Y_1, Y_2)\right\}$
+            \EndFor
+            \State \Return $result$
+        \EndFunction
+
+        \Function{GeneratePosition}{$s$: String, $k$: int}
+            \State $result \gets \left\{\mathtt{CPos}(\hlc{$k$}), \mathtt{CPos}(\hlc{$-(\mathsf{Length}(s)-k)$})\right\}$
+            \ForAll{\hlc{$r_1 = \mathtt{TokenSeq}(T_1, \dots, T_n)$ matching $s[k_1 : k-1]$ for some $k_1$}}
+                \ForAll{\hlc{$r_2 = \mathtt{TokenSeq}(T'_1, \dots, T'_m)$ matching $s[k : k_2]$ for some $k_2$}}
+                \State \hlc{$r_{12} \gets \mathtt{TokenSeq}(T_1, \dots, T_n, T'_1, \dots, T'_m)$}
+                \State \hlc{Let $c$ be s.t. $s[k_1 : k_2]$ is the $c^{\text{th}}$ match for $r_{12}$ in $s$}
+                    \State \hlc{Let $c'$ be the total number of matches for $r_{12}$ in $s$}
+                    \State $\tilde{r_1} \gets$ \Call{GenerateRegex}{$r_1, s$}
+                    \State $\tilde{r_2} \gets$ \Call{GenerateRegex}{$r_2, s$}
+                    \State $result \gets result \cup \left\{\mathtt{Pos}(\tilde{r_1}, \tilde{r_2}, \left\{\hlc{$c$}, \hlc{$-(c'-c+1)$}\right\})\right\}$
+                \EndFor
+            \EndFor
+            \State \Return $result$
+        \EndFunction
+    \end{algorithmic}
+    \vspace{5pt}
+    \hrule
+    \vspace{3pt}\hfill\textbf{(b)}
+    \vspace{-0.9\baselineskip}
+    \begin{algorithmic}
+        \Function{Map.Learn}{Examples $\spec$: $\mathsf{Dict}\langle \mathsf{State}, \mathsf{List}\langle T\rangle\rangle$}
+            \State Let $\spec$ be $\left\{\state_1 \mapsto Y_1, \dots, \state_m \mapsto Y_m\right\}$
+            \For{$j \gets 1\dots m$}
+            \State Witness subsequence \hlc{$Z_j \gets \mathsf{Map.Decompose}(\state_j, Y_j)$}
+            \EndFor
+            \State $\spec_1 \gets$ \hlc{$\bigl\{\state[Z_j[i] / x] \mapsto Y_j[i] \mid i = 0..|Z_j|-1,\, j = 1..m\bigr\}$}
+            \State $\vsa_1 \gets F.\mathsf{Learn}(\spec_1)$
+            \State $\spec_2 \gets$ \hlc{$\left\{\state_j \mapsto Z_j \mid j = 1..m\right\}$}
+            \State $\vsa_2 \gets S.\mathsf{Learn}(\spec_2)$
+            \State \Return $\mathsf{Map}(\vsa_1, \vsa_2)$
+        \EndFunction
+        \\
+        \Function{Filter.Learn}{Examples $\spec$: $\mathsf{Dict}\langle \mathsf{State}, \mathsf{List}\langle T\rangle\rangle$}
+            \State $\vsa_1 \gets S.\mathsf{Learn}(\hlc{$\spec$})$
+            \State $\spec' \gets$ \hlc{$\bigl\{ \state[Y[i]/x] \mapsto \mathsf{true} \mid (\state, Y) \in \spec,\, i = 0..|Y|-1\bigr\}$}
+            \State $\vsa_2 \gets F.\mathsf{Learn}(\spec')$
+            \State \Return $\mathsf{Filter}(\vsa_2, \vsa_1)$
+        \EndFunction
+    \end{algorithmic}
+    \vspace{3pt}
+    \caption{\textbf{(a)} FlashFill synthesis algorithm for learning substring expressions \cite[Figure 7]{flashfill};
+        \textbf{(b)} FlashExtract synthesis algorithm for learning $\mathsf{Map}$ and $\mathsf{Filter}$ sequence
+        expressions \cite[Figure 6]{flashextract}.
+        Highlighted portions correspond to domain-specific computations, which deduce I/O examples for propagation in
+        the DSL by ``inverting'' the semantics of the corresponding DSL operator.
+        Non-highlighted portions correspond to the search organization, isomorphic between FlashFill and FlashExtract.}
+    \label{fig:prose:prior}
+\end{figure*}

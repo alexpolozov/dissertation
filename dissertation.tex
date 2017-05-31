@@ -2,7 +2,7 @@
 \documentclass[12pt, proquest, natbib]{uwthesis}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[tracking=true]{microtype}
+\usepackage{microtype}
 \usepackage{textcomp}
 
 % MATH
@@ -14,7 +14,7 @@
 \usepackage{mathtools}
 
 %%% FONTS
-\usepackage[scaled=.98, sups]{XCharter}
+\usepackage[scaled=.98, sups, osf]{XCharter}
 \usepackage[scaled=1.04, varqu, varl]{inconsolata}
 \usepackage[scaled]{berasans}
 \usepackage[xcharter, cmbraces, varg, vvarbb, scaled=1.07,
@@ -61,6 +61,7 @@
 \usepackage{hyphenat}
 \usepackage[xspace]{ellipsis}
 \usepackage{syntax}
+\usepackage{soulpos}
 \usepackage[color=red!55, textsize=footnotesize, textwidth=1.3cm,
             shadow, prependcaption, obeyFinal, colorinlistoftodos]{todonotes}
 
@@ -132,6 +133,7 @@
     \DeclareRobustCommand\em
         {\@nomath\em \ifdim \fontdimen\@ne\font >\z@
         \bfseries \else \itshape \fi}
+    \renewcommand{\@todonotes@todolistname}{List of TODOs}
 \makeatother
 \clubpenalty = 10000
 \widowpenalty = 10000
@@ -152,7 +154,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 \include{macros}
-\listoftodos\todototoc
+\todototoc\listoftodos
 
 %%% PRELIMINARY PAGES
 \hypersetup{pageanchor=false}
