@@ -35,7 +35,8 @@ Hereinafter I use the words ``program set'' and ``version space algebra'' interc
     \begin{align*}
         &P \in \left\{P_1, \dots P_k\right\} \tag*{if $\exists\, j\colon P = P_j$} \\
         &P \in \vsaunion(\vsa_1, \dots, \vsa_k) \tag*{if $\exists\, j\colon P \in \vsa_j$} \\
-        &P \in \joinCons(\vsa_1, \dotsc, \vsa_k) \tag*{if $P = F(P_1, \dots, P_k) \ \wedge\ \forall j\colon P_j \in \vsa_j$}
+        &P \in \joinCons(\vsa_1, \dotsc, \vsa_k)
+            \tag*{if $P = F(P_1, \dots, P_k) \ \wedge\ \forall j\colon P_j \in \vsa_j$}
     \end{align*}
 \end{defn}
 
@@ -61,10 +62,11 @@ Therefore in common (non-degenerate) cases $\volume{\vsa} = \mathcal{O}(\log |\v
 
 \begin{figure}[t]
     \centering
-    % \uwsinglespace
     \begin{dot2tex}[options=--usepdflatex --figonly]
         \input{vsa/vsa.example.dot}
     \end{dot2tex}
+    \uwsinglespace
+    \vspace*{\baselineskip}
     \caption{A VSA representing all possible programs output the string \stringliteral{425} in $\ffdsl$.
     Leaf nodes $\vsa_1, \vsa_2, \vsa_3, \vsa_{12}, \vsa_{23}$ are VSAs representing all ways to output substrings
     \stringliteral{4}, \stringliteral{2}, \stringliteral{5}, \stringliteral{42}, and \stringliteral{25} respectively
@@ -229,12 +231,12 @@ For example, it allows us to efficiently filter out the programs in $\vsa$ that 
 Estimating the size of $\clustering[\vsa][\states]$ and the running time of clustering is difficult, since these values
 depend not only on $\vsa$ and $\state$, but also on the semantics of the operators in $\dsl$ and the number of
 collisions in their possible output values.
-However, in \Cref{sec:experiments} I show that these values usually remain small for any practical DSL.
+However, in \Cref{sec:prose:evaluation:experiments} I show that these values usually remain small for any practical DSL.
 
 \section{VSA as a Language}
 \label{sec:vsa:language}
 
-\begin{figure}[t]
+\begin{figure}
     \uwsinglespace
     \begin{minipage}[b]{0.42\textwidth}
         \begin{lstlisting}[language=dsl, gobble=12]
@@ -260,9 +262,8 @@ However, in \Cref{sec:experiments} I show that these values usually remain small
     \label{fig:vsa:language-repr}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure}
     \centering
-    % \uwsinglespace
     \small
     \begin{algorithmic}[1]
         \Functionx{VsaToDsl}{VSA $\vsa$}
@@ -287,6 +288,8 @@ However, in \Cref{sec:experiments} I show that these values usually remain small
             \State \Return the context-free grammar $G = \langle V, \Sigma, R, \mathsf{sym}(\vsa)\rangle$
         \EndFunction
     \end{algorithmic}
+    \uwsinglespace
+    \vspace*{\baselineskip}
     \caption{An algorithm for translating a VSA $\vsa$ of programs in a DSL $\dsl$ into an isomorphic grammar for a
         sub-DSL $\dsl' \subset \dsl$.}
     \label{fig:vsa:incremental}

@@ -7,28 +7,38 @@ In this section, I define witness functions formally and give various examples o
 technologies.
 
 \begin{defn}[Witness function]
-    Let $F(N_1,\dots,N_k)$ be an operator in a DSL $\dsl$.
-    A \emph{witness function} of $F$ for $N_j$ is a function $\omega_{j}(\spec)$ that deduces a \emph{necessary}
-    spec $\spec_j$ on $N_j$ given a spec $\spec$ on $F(N_1, \dots, N_k)$.
-    Formally, $\omega_j(\spec) = \spec_j$ iff $\left[F(N_1, \dots, N_k) \models \spec\right] \wf{} \left[N_j \models
-    \spec_j\right]$.\footnote{All free variables are universally quantified unless otherwise specified.}
+    Let $F\left(N_1,\dots,N_k\right)$ be an operator in a DSL $\dsl$.
+    A \emph{witness function} of $F$ for $N_j$ is a function $\omega_{j}\left(\spec\right)$ that deduces a
+    \emph{necessary} spec $\spec_j$ on $N_j$ given a spec $\spec$ on $F\left(N_1, \dots, N_k\right)$.
+    Formally, $\omega_j\left(\spec\right) = \spec_j$ iff the following implication holds:\footnote{All free variables
+        are universally quantified unless otherwise specified.}
+    \begin{equation*}
+        F\left(N_1, \dots, N_k\right) \models \spec \qquad\Longrightarrow\qquad N_j \models \spec_j.
+    \end{equation*}
 \end{defn}
 
 \begin{defn}[Precise witness function]
-    A witness function $\omega_j$ of $F(N_1, \dots, N_k)$ for $N_j$ is \emph{precise} if its deduced spec is
+    A witness function $\omega_j$ of $F\left(N_1, \dots, N_k\right)$ for $N_j$ is \emph{precise} if its deduced spec is
     \emph{necessary and sufficient}.
-    Formally, $\omega_j(\spec) = \spec_j$ is precise iff
-    $\left[N_j \models \spec_j\right] \wfc{} \left[\exists\, N_1, \dots, N_{j-1}, N_{j+1}, \dots, N_k\colon\allowbreak
-        F(N_1, \dots, N_k) \models \spec \right]$.
+    Formally, $\omega_j\left(\spec\right) = \spec_j$ is precise iff
+    \begin{equation*}
+        N_j \models \spec_j \qquad\Longleftrightarrow\qquad
+        \exists\, N_1, \dots, N_{j-1}, N_{j+1}, \dots, N_k\colon\ F\left(N_1, \dots, N_k\right) \models \spec.
+    \end{equation*}
 \end{defn}
 
 \begin{defn}[Conditional witness function]
-    A \emph{(precise) conditional witness function} of $F(N_1, \dots, N_k)$ for $N_j$ is a function $\omega_j(\spec
-    \assuming N_{k_1} = v_1, \dots, N_{k_s} = v_s)$ that deduces a necessary (and sufficient) spec $\spec_j$ on $N_j$
-    given a spec $\spec$ on $F(N_1, \dots, N_k)$ under the assumption that a subset of other
-    parameters $N_{k_1}, \dots, N_{k_s}$ of $F$ (called \emph{prerequisites}) have fixed values $v_1, \dots, v_k$.
-    Formally, $\omega_j(\spec \assuming N_t = v_t) = \spec_j$ iff $\left[F(N_1, \dots, N_{t-1}, v_t, N_{t+1}, \dots,
-    N_k) \models \spec\right] \wf{} \left[N_j \models \spec_j\right]$.
+    A \emph{(precise) conditional witness function} of $F\left(N_1, \dots, N_k\right)$ for $N_j$ is a function
+    $\omega_j\left(\spec \assuming N_{k_1} = v_1, \dots, N_{k_s} = v_s\right)$ that deduces a necessary (and sufficient)
+    spec $\spec_j$ on $N_j$ given a spec $\spec$ on $F\left(N_1, \dots, N_k\right)$ under the assumption that a subset
+    of other parameters $N_{k_1}, \dots, N_{k_s}$ of $F$ (called \emph{prerequisites}) have fixed values $v_1, \dots,
+    v_k$.
+    Formally, $\omega_j\left(\spec \assuming N_t = v_t\right) = \spec_j$ iff the following implication holds:
+    \begin{equation*}
+        F\left(N_1, \dots, N_{t-1}, v_t, N_{t+1}, \dots, N_k\right) \models \spec
+        \qquad\Longrightarrow\qquad
+        N_j \models \spec_j.
+    \end{equation*}
 \end{defn}
 
 \input{wf-list}

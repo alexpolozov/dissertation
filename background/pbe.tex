@@ -127,7 +127,7 @@ The \emph{position expression} logic for choosing starting and ending positions 
             \bottomrule
         \end{tabular}
     \end{center}
-    One FlashFill program that performs this task is shown below ($\circ$ denotes concatenation):
+    One possible FlashFill program that performs this task is shown below:
     \begin{multline*}
         \mathsf{ConstStr}(\stringliteral{(}) \concat \mathsf{Match}(v_1, \stringliteral{\textbackslash d+}, 1) \concat
         \mathsf{ConstStr}(\stringliteral{)\textvisiblespace}) \concat \\
@@ -148,7 +148,7 @@ It has been integrated in Microsoft PowerShell 3.0 for release with Windows 10 a
 Suite for extracting custom fields from log files.
 In the original publication, \citeauthor*{flashextract} present three instantiations of FlashExtract; in this work, we
 focus on the \emph{text} instantiation as a running example, although \emph{Web} and \emph{table} instantiations were
-also reimplemented on top of the PROSE framework (see \Cref{sec:casestudies}).
+also reimplemented on top of the PROSE framework (see \Cref{sec:prose:evaluation:casestudies}).
 
 Each program in the FlashExtract DSL $\fedsl$ takes as input a \emph{textual document} $doc$, and returns a sequence
 of spans in that document.

@@ -28,6 +28,7 @@ formally defined \emph{theories} (currently based on the SMT-LIB format~\cite{sm
 domain-specific algorithmic insights for improving synthesis performance on a given DSL.
 As a result, at the moment performance of all SyGuS algorithms is inapplicable in real-life industrial settings even for
 simplest tasks~\cite{bodik:layout,andersen:procedural,singh2012synthesizing}.
+\todoinline{More detailed introduction.}
 
 This state of affairs in mass-market industrial deployment of program synthesis has changed in \citeyear{flashfill}
 thanks to FlashFill~\cite{flashfill}, a technology for automatic synthesis of string
@@ -52,7 +53,7 @@ Many of these technologies were also deployed in mass-market products, including
 Exchange, PowerShell, and Azure Log Analytics.
 
 Unfortunately, the engineering effort associated with implementation and deployment of a domain-specific PBE-based
-technology is substantial.
+technology is enormous.
 Domain-specific synthesis applications implement program synthesis algorithms that are designed specifically for a given
 DSL, and are tightly dependent on its structure.
 This approach drastically improves synthesis performance, but also limits industrial applicability of the resulting
@@ -76,13 +77,66 @@ domain experts and software engineers.
 
 We have implemented this common algorithm as PROSE framework (``PROgram Synthesis using
 Examples'').\footnote{\url{https://microsoft.github.io/prose}}
+Over the last three years, PBE technologies developed on top of PROSE have been deployed in $10$+ Microsoft applications
+and external projects.
+In this work, I am using them as case studies, exploring the consequences of making example-driven program synthesis an
+industrial commodity.
+As it turns out, deploying PBE-based technologies in the mass markets leads to a new set of HCI and AI challenges, which
+do not arise on a smaller scale.
+These include:
+\begin{itemize}[nosep]
+    \item Disambiguating user intent from 1-3 input-output examples.
+    \item Incorporating iterative refinements of the same intent in a single synthesis session.
+    \item Intelligently and proactively leading the user toward better examples.
+    \item Transparently communicating the synthesizer's current understanding of the task, as well as all the
+        information it has used to reach this understanding.
+    \item Efficiently analyzing, storing, and pruning sets of up to $10^{30}$ candidate programs.
+    \item Ensuring that the synthesizer's implementation \emph{and} the implementation of its produced artifacts
+        (learned programs) is efficient and maintainable.
+    \item Adapting and improving all the aforementioned capabilities over time, learning on the completed tasks.
+\end{itemize}
+I study these and related questions in the second half of this work, presenting our solutions to the challenges of
+mass-market industrial deployment of program synthesis.
 
 \paragraph{Thesis Statement:}
 \emph{
-    Interactive example-driven program synthesis for arbitrary data-centric domains can be expressed as one common
+    Interactive example-driven program synthesis for any data-centric domain can be expressed as a common
     domain-agnostic top-down search algorithm parameterized by concise domain-specific deduction procedures.
     Such decomposition makes program synthesizers scale to real-life application domains, enables domain-agnostic
     intent disambiguation techniques, incremental synthesis sessions, and mass-market deployment of the derived
     technologies.
 }
 
+\paragraph{Outline}
+\Cref{ch:background} begins with the relevant background for presenting the rest of the work.
+I introduce the prior work in domain-specific inductive program synthesis (FlashFill, FlashExtract, and their
+successors) in more detail, and use them as running examples thereafter throughout the work.
+I also introduce formally the notions of a domain-specific language, inductive specification, and several variations of
+the domain-specific program synthesis problem, motivated and tackled in this work.
+
+\Cref{ch:vsa} presents version space algebras, an important data structure for storing, pruning, and reasoning about
+huge program spaces that arise in the process of solving a program synthesis problem.
+It has been first used in the context of program synthesis by \citet{lau:smartedit}; in this work, I present the
+first comprehensive formalism that explores all the aspects of VSAs in the context of PBE, as well as various extensions
+to them that make VSAs suitable for ranked and incremental flavors of the synthesis problem.
+
+\Cref{ch:prose} introduces the PROSE framework.
+It presents and formalizes the underlying algorithmic concepts that makes PROSE efficiently scale to real-life
+application domains: domain-specific witness functions and domain-agnostic deductive search.
+I give a comprehensive overview of expressing prior work as instances on top of the PROSE framework, design trade-offs,
+and key benefits of such transition.
+I then present our evaluation of the PROSE framework and numerous PBE technologies developed on top of it in terms of
+synthesizer performance, disambiguation effectiveness, and software engineering effort.
+Finally, I discuss some limitations and extensions of the technique.
+
+\Cref{ch:interactive} studies the consequences of mass-market deployment of PROSE-based PBE applications.
+It introduces \emph{interactive program synthesis}, a novel view on the program synthesis problem that arise in
+real-life interactions of end users with a synthesis-powered application.
+This view embraces program synthesis as an iterative process, in which the user is constantly refining his/her
+expression of the intent based on the behavior of the current program candidate on the held out data.
+I show how automatically and proactively reusing the learned insights from the previous iterations of synthesis in the
+same session aids the debugging and improves the user's confidence in the system.
+Specifically, I show how the speed of every synthesis iteration can be improved by performing program synthesis
+incrementally; how to lead the user toward better examples by automatically constructing clarifying questions that
+optimize the disambiguating power of the next refining example, and how incorporating these user interaction models in
+the synthesizer interface improves the quality of the synthesized programs and the users' confidence in them.
