@@ -1,2 +1,88 @@
 \chapter{Introduction}
 \label{ch:intro}
+
+Program synthesis is the task of finding a program in the underlying language that satisfies a given user intent,
+expressed in the form of some specification~\cite{gulwani2010dimensions}.
+The origin of the idea of program synthesis dates back to the early days of AI~\cite{green69,waldinger69}, with the
+original aim of automatizing the programming experience, given a formal specification of the desired software.
+In addition, has applications to a wide variety of domains,
+including robotics~\cite{kuniyoshi1994learning}, software development~\cite{kuncak2012software}, and
+biology~\cite{synthesis:biological}.
+However, the true potential of this area still remains elusive due to its inherent complexity:
+because of the huge and arbitrary nature of the underlying state space of possible programs, program synthesis is
+an incredibly hard combinatorial search problem.
+
+In the last decade, synthesis-based technologies have resurged in popularity,
+thanks to the recent advancements in efficient search algorithms, constraint solving, and stochastic techniques like
+deep learning.
+The key insight to scaling program synthesis is \emph{syntactic guidance}, first formalized universally as a
+\emph{syntax-guided synthesis} (SyGuS) problem~\cite{sygus}.
+Instead of a general-purpose programming language, SyGuS-based techniques perform their search in a
+\emph{domain-specific language} (DSL).
+A DSL is a syntactic restriction on the search space, which narrows it down to only those programs that are practical in
+a certain application domain.
+The SyGuS initiative consists in development of general-purpose synthesis algorithms that take as input a DSL and a
+formal specification $\spec$, and find a program in the DSL that satisfies~$\spec$.
+However, generality of such algorithms implies that (a) their specification format has to be limited to a common set of
+formally defined \emph{theories} (currently based on the SMT-LIB format~\cite{smtlib}), and (b) they cannot leverage any
+domain-specific algorithmic insights for improving synthesis performance on a given DSL.
+As a result, at the moment performance of all SyGuS algorithms is inapplicable in real-life industrial settings even for
+simplest tasks~\cite{bodik:layout,andersen:procedural,singh2012synthesizing}.
+
+This state of affairs in mass-market industrial deployment of program synthesis has changed in \citeyear{flashfill}
+thanks to FlashFill~\cite{flashfill}, a technology for automatic synthesis of string
+transformations, available in Microsoft Excel 2013.
+FlashFill was widely successful and appraised, thanks to a combination of important features:
+\begin{itemize}[nosep]
+    \item It aids with the widespread problem of \emph{data wrangling} --- transforming, cleaning, and reshaping a
+        dataset from a semi-structured form into a structured one, amenable to automated
+        processing~\cite{kandel2012enterprise}.
+    \item It is driven by input-output examples of the desired transformation's behavior, which makes it easily
+        accessible to end users.
+    \item It is able to synthesize the desired transformation from as few as 1-3 examples of intent, and in a fraction
+        of a second.
+\end{itemize}
+
+The success of FlashFill has prompted a series of successor technologies based on the same methodology --
+\emph{programming by examples} (PBE).
+These include FlashExtract~\cite{flashextract} -- a technology for automatic extraction of data from semi-structured log
+files and webpages, FlashRelate~\cite{flashrelate} -- a technology for automatic reshaping of spreadsheets into a
+relational format, and others.
+Many of these technologies were also deployed in mass-market products, including Microsoft Windows 10, Cortana,
+Exchange, PowerShell, and Azure Log Analytics.
+
+Unfortunately, the engineering effort associated with implementation and deployment of a domain-specific PBE-based
+technology is substantial.
+Domain-specific synthesis applications implement program synthesis algorithms that are designed specifically for a given
+DSL, and are tightly dependent on its structure.
+This approach drastically improves synthesis performance, but also limits industrial applicability of the resulting
+codebase.
+Specifically, the underlying DSL is hard to extend because even small DSL changes might require non-trivial changes
+to the synthesis algorithm and implementation.
+Both the original implementation of a PBE-based synthesizer and the subsequent software evolution may take up to 1-2
+man-years of effort and require PhD-level expertise in program synthesis.
+
+In this work, I show that most domain-specific PBE-based synthesis applications produced in the last
+decade~\cite{smartedit,miller:colorful,flashfill,flashextract,flashrelate,flashnormalize,vldb12:semantic,andersen:procedural,pldi15:swarat,pldi15:osera,harris2011spreadsheet,singh2012synthesizing}
+can be cast as instance of one common methodology.
+We decomposed all of them into:
+\begin{enumerate}[nosep]
+    \item A set of domain-specific insights that describe properties of the application domain (i.e. the DSL).
+    \item A general-purpose meta-algorithm that is parameterized with a DSL and the aforementioned insights.
+\end{enumerate}
+The algorithm can be written independently once and for all domains.
+The insights are domain-specific, but independent of the chosen synthesis strategies, thus can be defined by
+domain experts and software engineers.
+
+We have implemented this common algorithm as PROSE framework (``PROgram Synthesis using
+Examples'').\footnote{\url{https://microsoft.github.io/prose}}
+
+\paragraph{Thesis Statement:}
+\emph{
+    Interactive example-driven program synthesis for arbitrary data-centric domains can be expressed as one common
+    domain-agnostic top-down search algorithm parameterized by concise domain-specific deduction procedures.
+    Such decomposition makes program synthesizers scale to real-life application domains, enables domain-agnostic
+    intent disambiguation techniques, incremental synthesis sessions, and mass-market deployment of the derived
+    technologies.
+}
+

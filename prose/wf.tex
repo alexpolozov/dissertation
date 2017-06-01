@@ -1,2 +1,65 @@
 \section{Witness Functions}
 \label{sec:prose:wf}
+As described above, a \emph{witness function} is a generalization of inverse semantics for an operator.
+In other words, it is a \emph{problem reduction logic}, which deduces a necessary (or sufficient) spec on the operator's
+parameters given a desired spec on the operator's output.
+In this section, I define witness functions formally and give various examples of their usages in the existing PBE
+technologies.
+
+\begin{defn}[Witness function]
+    Let $F(N_1,\dots,N_k)$ be an operator in a DSL $\dsl$.
+    A \emph{witness function} of $F$ for $N_j$ is a function $\omega_{j}(\spec)$ that deduces a \emph{necessary}
+    spec $\spec_j$ on $N_j$ given a spec $\spec$ on $F(N_1, \dots, N_k)$.
+    Formally, $\omega_j(\spec) = \spec_j$ iff $\left[F(N_1, \dots, N_k) \models \spec\right] \wf{} \left[N_j \models
+    \spec_j\right]$.\footnote{All free variables are universally quantified unless otherwise specified.}
+\end{defn}
+
+\begin{defn}[Precise witness function]
+    A witness function $\omega_j$ of $F(N_1, \dots, N_k)$ for $N_j$ is \emph{precise} if its deduced spec is
+    \emph{necessary and sufficient}.
+    Formally, $\omega_j(\spec) = \spec_j$ is precise iff
+    $\left[N_j \models \spec_j\right] \wfc{} \left[\exists\, N_1, \dots, N_{j-1}, N_{j+1}, \dots, N_k\colon\allowbreak
+        F(N_1, \dots, N_k) \models \spec \right]$.
+\end{defn}
+
+\begin{defn}[Conditional witness function]
+    A \emph{(precise) conditional witness function} of $F(N_1, \dots, N_k)$ for $N_j$ is a function $\omega_j(\spec
+    \assuming N_{k_1} = v_1, \dots, N_{k_s} = v_s)$ that deduces a necessary (and sufficient) spec $\spec_j$ on $N_j$
+    given a spec $\spec$ on $F(N_1, \dots, N_k)$ under the assumption that a subset of other
+    parameters $N_{k_1}, \dots, N_{k_s}$ of $F$ (called \emph{prerequisites}) have fixed values $v_1, \dots, v_k$.
+    Formally, $\omega_j(\spec \assuming N_t = v_t) = \spec_j$ iff $\left[F(N_1, \dots, N_{t-1}, v_t, N_{t+1}, \dots,
+    N_k) \models \spec\right] \wf{} \left[N_j \models \spec_j\right]$.
+\end{defn}
+
+\input{wf-list}
+
+\begin{example}
+    \Cref{tbl:wfs:flashfill} shows witness functions for all FlashFill operators from \Cref{fig:dsl:flashfill}:
+    \begin{itemize}[nosep]
+        \item A \dslinline|Concat($atom$, $transform$)| expression returns $w$ iff $atom$ returns some prefix of $w$.
+            In addition, assuming that $atom$ returns $v$, $transform$ mush return the remaining suffix of~$w$ after the
+            end of $v$.
+        \item A \dslinline|ConstStr($s$)| expression returns $w$ iff $s$ is equal to $w$.
+        \item An expression ``\dslinline|let $x$ = std.Kth($inputs$, $k$) in $\dots$|'' returns $w$ iff $x$ is bound to
+            an element of $inputs$ that has $w$ as a substring.
+        \item A \dslinline|Substring($x$, $pp$)| expression returns $w$ (assuming that $x$ returns $v$) iff $pp$ returns
+            a position span of any occurrence of $w$ in $v$ as a substring.
+        \item An \dslinline|AbsPos($x$, $k$)| expression returns $c$ (assuming that $x$ returns $v$) iff $k$ is equal to
+            either~$c$ or $c-|v|-1$ (since $k$ may represent a left or right offset depending on its sign).
+        \item An expression \dslinline|RegexPos($x$, $rr$, $k$)| returns $c$ (assuming that $x$ returns $v$) iff $rr$ is
+            equal to any pair of regular expressions that matches the boundaries of position $c$ in the string~$v$.
+            In addition, assuming that $rr$ is equal to $\langle r_1, r_2\rangle$, $P$ returns $c$ iff $k$ is equal to
+            a index of $c$ (from the left or right) among all matches of $\langle r_1, r_2\rangle$ in $v$.
+    \end{itemize}
+    \label{ex:wf:flashfill}
+\end{example}
+
+Most witness functions are domain-specific w.r.t.  the operator that they characterize.
+However, once formulated in a module for a domain such as substring extraction, they can be reused by any DSL.
+In our example, witness functions for $\mathsf{Pair}$ and $\mathsf{Kth}$ operators in \Cref{tbl:wfs:prose} do not
+depend on the domain of their parameters, and are therefore formulated generically, for any DSL.
+Witness functions in \Cref{tbl:wfs:flashfill} hold only for their respective operators, but they do
+not depend on the rest of the DSL in which these operators are used, provided the operator semantics is conformant with
+its (strongly-typed) signature.
+This property allows us to define witness functions as generally as possible in order to reuse the corresponding
+operators in any conformant DSL.

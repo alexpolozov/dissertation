@@ -1,4 +1,4 @@
-\PassOptionsToPackage{numbers}{natbib}
+\PassOptionsToPackage{numbers, sort}{natbib}
 \documentclass[12pt, proquest, natbib]{uwthesis}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -33,7 +33,7 @@
 \usepackage{tcolorbox}
 \usepackage{adjustbox}
 \usepackage{tikz}
-\usetikzlibrary{shadings, shapes, arrows}
+\usetikzlibrary{shadings, shapes, arrows, tikzmark, decorations.pathreplacing}
 \tcbuselibrary{raster, skins}
 \tcbset{sharp corners=all, boxrule=0.1mm, colback=black!3!white}
 \tikzset{
@@ -45,14 +45,14 @@
 %%% TYPESETTING
 \usepackage[inline]{enumitem}
 \usepackage{booktabs}
-\usepackage{alltt}
 \usepackage[super]{nth}
 \usepackage{bm}
+\usepackage[figuresright]{rotating}
 
 %%% UTILITIES
+\usepackage{tabu}
 \usepackage{import}
 \usepackage{adjustbox}
-\usepackage{mdframed}
 \usepackage{relsize}
 \usepackage{scalerel}
 \usepackage{twoopt}
@@ -90,12 +90,17 @@
     morestring = [b]',
 }
 \definecolor{linenum-gray}{HTML}{888888}
-\renewcommand{\algorithmiccomment}[1]{ {\itshape \textsc{//} #1}}
+\renewcommand{\algorithmiccomment}[1]{ {\itshape \color{Green} \textsc{//} #1}}
+\algnewcommand\algorithmicyield{\textbf{yield}}
+\algnewcommand\Yield{\algorithmicyield\ \algorithmicreturn\ }
 \newcommand{\NoNumber}{\def\alglinenumber##1{}}
 \newcommand{\WithNumber}{\def\alglinenumber##1{\sf\scriptsize\color{linenum-gray}##1:\hspace{-11pt}}}
 \newcommand{\Functionx}[2]{\NoNumber \Function{#1}{#2} \addtocounter{ALG@line}{-1} \WithNumber}
 \let\oldStatex\Statex
 \renewcommand{\Statex}{\oldStatex \hspace{\algorithmicindent}}
+\algnewcommand\algorithmicinput{\textbf{Input}}
+\algnewcommand\Given[2]{\oldStatex \algorithmicinput\ \ensuremath{\bm{#1}}: \begin{varwidth}[t]{0.80\linewidth} #2 \end{varwidth}}
+\newcommand*{\Let}[2]{\State #1 $\gets$ \parbox[t]{\linewidth-\algorithmicindent}{#2\strut}}
 
 %%% OPTIONS
 % Whether to color hyperlinks in the PDF

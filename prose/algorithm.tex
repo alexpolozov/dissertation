@@ -1,2 +1,164 @@
 \section{Deductive Search}
 \label{sec:prose:algorithm}
+
+A set of witness functions for all the parameters of an operator allows us to reduce the inductive synthesis problem
+$\langle N, \spec\rangle$ to the synthesis subproblems for its parameters.
+We introduce a simple non-conditional case first, and then proceed to complete presentation of the entire algorithm.
+
+\begin{theorem}
+    Let $N := F(N_1, \dots, N_k)$ be a rule in a DSL $\dsl$, and $\spec$ be a spec on $N$.
+    Assume that $F$ has $k$ non-conditional witness functions $\omega_j(\spec) = \spec_j$,
+    and $\vsa_j \models \spec_j$ for all $j = 1..k$ respectively.
+    \begin{enumerate}[nosep]
+        \item $\mathsf{Filter}(\joinCons(\vsa_1, \dots, \vsa_k), \spec) \models \spec$.
+        \item If all $\omega_j$ are precise, then $\joinCons(\vsa_1, \dots, \vsa_k) \models \spec$.
+    \end{enumerate}
+    \label{thm:wf:noncond}
+\end{theorem}
+\begin{proof} \leavevmode
+    \begin{enumerate}[nosep]
+        \item By definition of $\mathsf{Filter}(\vsa, \spec)$.
+        \item All $\omega_j$ deduce specs for $N_j$ given only the outer spec $\spec$, therefore they
+            are independent from each other.
+            Also, all $\omega_j$ are precise, therefore each $\vsa_j$ individually is necessary and sufficient to
+            satisfy $\spec$. \qedhere
+    \end{enumerate}
+\end{proof}
+
+\Cref{thm:wf:noncond} gives a straightforward recipe for synthesis of operators with independent parameters, such as
+\dslinline|Pair($p_1$, $p_2$)|.
+However, in most real-life cases operator parameters are dependent on each other.
+Consider an operator \dslinline|Concat($atom$, $transform$)| from FlashFill, and a spec $\state \tospec s$.
+It is possible to design individual witness functions $\omega_a$ and $\omega_t$ that return a disjunction $\spec_a$ of
+prefixes of $s$ and a disjunction $\spec_t$ of suffixes of $s$, respectively.
+Both of these witness functions individually are precise (i.e. sound and complete); however, there is no straightforward
+way to combine recursive synthesis results $\vsa_a \models \spec_a$ and $\vsa_t \models \spec_t$ into a valid program
+set for $\spec$.
+
+In order to enable deductive search for dependent operator parameters, we apply \emph{skolemization}~\cite{modeltheory}.
+Instead of deducing specs $\spec_a$ and $\spec_t$ that independently entail $\spec$, we deduce only one
+independent spec (say, $\spec_a$), and then \emph{fix the value of ``$atom$''}.
+For each fixed value of $atom$ a \emph{conditional witness function} $\omega_t(\spec \assuming atom = v)$ deduces a
+spec $\spec_{t,v}$ that is a necessary and sufficient characterization for $\spec$.
+Namely, $\spec_{t,v}$ in our example is $\state \tospec s[|v|..]$ (i.e. the remaining suffix) if $v$ is a prefix of~$s$,
+or $\bot$ otherwise.
+
+Skolemization splits the deduction into multiple independent branches, one per each value of $atom$.
+These values are determined by VSA clustering: \mbox{$\clustering[\vsa_a] = \{v_1 \mapsto \vsa_a^1,
+\dots, v_k \mapsto \vsa_a^k\}$}.
+Within each branch, the program sets $\vsa_a^j$ and the corresponding $\vsa_t^j \models \spec_{t,v_j}$ are
+independent, hence $\joinCons[\mathsf{Concat}](\vsa_a^j, \vsa_t^j) \models \spec$ by \Cref{thm:wf:noncond}.
+The union of $k$ branch results constitutes a comprehensive set of all $\mathsf{Concat}$ programs that satisfy $\spec$.
+
+\begin{defn}
+    Let $N := F(N_1, \dots, N_k)$ be a rule in a DSL $\dsl$ with $k$ associated (possibly conditional) witness functions
+    $\omega_1, \dots, \omega_k$.
+    A \emph{dependency graph} of witness functions of $F$ is a directed graph $G(F) = \langle V, E\rangle$ where $V=
+    \left\{N_1, \dots, N_k\right\}$, and $\langle N_i, N_j\rangle \in E$ iff $N_i$ is a prerequisite for $N_j$.
+\end{defn}
+
+A dependency graph can be thought of as a union of all possible Bayesian networks over parameters of $F$.
+It is not a single Bayesian network because $G(F)$ may contain cycles: it is often possible to independently express
+$N_i$ in terms
+of $N_j$ as a witness function $w_i(\spec \assuming N_j = v)$ and $N_j$ in terms of $N_i$ as a different witness
+function $w_j(\spec \assuming N_i = v)$.
+One simple example of such phenomenon is \dslinline|Concat($atom$, $transform$)|: we showed above how to decompose its
+inverse semantics into a witness function for prefixes and a conditional witness function for the suffix, but a
+symmetrical decomposition into a witness function for suffixes and a conditional witness function for prefixes is also
+possible.
+
+\begin{figure}[p!]
+    \begin{fullpage}
+        \small
+        \uwsinglespace
+        \begin{algorithmic}[1]
+            \Given{G(F)}{dependency graph of witness functions for the rule $F$}
+            \Given{\spec}{specification for the rule $F$}
+            \Functionx{LearnRule}{$G(F), \spec$}
+            \State Permutation $\pi \gets \mathsf{TopologicalSort}(G(F))$
+            \State $\vsa \gets \bigvsaunion \bigl\{ \vsa' \bigmid \vsa' \in \Call{LearnPaths}{G(F), \spec, \pi, 1, \varnothing} \bigr\}$
+            \If{all witness functions in $G(F)$ are precise}
+            \State \Return $\vsa$
+            \Else
+            \State \Return $\mathsf{Filter}(\vsa, \spec)$
+            \EndIf
+            \EndFunction
+            \Statex
+            \Given{\pi}{permutation of the parameters of $F$}
+            \Given{i}{index of a current deduced parameter in $\pi$}
+            \Given{Q}{a mapping of prerequisite values $\values_{k}$ and corresponding learnt program sets $\vsa_{k}$ on the current path}
+            \Functionx{LearnPaths}{$G(F), \spec, \pi, i, Q$}
+            \If{$i > k$}
+            \State Let $\vsa_1, \dots, \vsa_k$ be learnt program sets for $N_1, \dots, N_k$ in $Q$
+            \State \Return $\left\{ \joinCons(\vsa_1, \dots, \vsa_k) \right\}$
+            \EndIf
+            \State $p \gets \pi_i$ \Comment{Current iteration deduces the rule parameter $N_p$}
+            \State Let $\omega_{p}(\spec \assuming N_{k_1} = \values_1, \dots, N_{k_m} = \values_m)$ be the witness
+            function for $N_{p}$
+            \Statex \Comment{Extract the prerequisite values for $N_{p}$ from the mapping $Q$}
+            \State $\{\values_{k_1} \mapsto \vsa_{k_1}, \dots, \values_{k_m} \mapsto \vsa_{k_m}\} \gets Q[k_1, \dots, k_m]$
+            \Statex \Comment{Deduce the spec for $N_{p}$ given $\spec$ and the prerequisites}
+            \State $\spec_{p} \gets \omega_{p}(\spec \assuming N_{k_1} = \values_{k_1}, \dots, N_{k_m} = \values_{k_m})$ \label{alg:line:wf}
+            \If{$\omega_p = \bot$}
+            \Return $\emptyset$
+            \EndIf
+            \Statex \Comment{Recursively learn a valid program set $\vsa_{p} \models \spec_{p}$}
+            \State $\vsa_{p} \gets \mathsf{Learn}(N_{p}, \spec_{p})$ \label{alg:line:sublearn}
+            \Statex \Comment{If no other parameters depend on $N_{p}$, proceed without clustering}
+            \If{$N_{p}$ is a leaf in $G(F)$}
+            \State $Q' \gets Q[p := \top \mapsto \vsa_{p}]$
+            \State \Return \Call{LearnPaths}{$G(F), \spec, \pi, i+1, Q'$}
+            \Statex \Comment{Otherwise cluster $\vsa_{p}$ on $\states$ and unite the results across branches}
+            \Else
+            \State $\states \gets$ the input states associated with $\spec$
+            \ForAll{$\bigl(\values'_j \mapsto \vsa'_{s,j}\bigr) \in \clustering[\vsa_p][\states]$} \label{alg:line:clusters}
+            \State $Q' \gets Q\bigl[s := \values'_j \mapsto \vsa'_{s,j}\bigr]$
+            \State \Yield \textbf{all} \Call{LearnPaths}{$G(F), \spec, \pi, i+1, Q'$}
+            \EndFor
+            \EndIf
+            \EndFunction
+        \end{algorithmic}
+        % \end{mdframed}
+        \caption{A learning procedure for the DSL rule $N := F(N_1, \dots, N_k)$ that uses $k$ conditional witness functions
+        for $N_1, \dots, N_k$, expressed as a dependency graph $G(F)$.}
+        \label{fig:prose:algorithm}
+    \end{fullpage}
+\end{figure}
+
+\begin{theorem}
+    Let $N := F(N_1, \dots, N_k)$ be a rule in a DSL $\dsl$, and $\spec$ be a spec on $N$.
+    If there exists an acyclic spanning subgraph of $G(F)$ that includes each node with all its prerequisite edges, then
+    there exists a polynomial procedure that constructs a valid program set $\vsa \models \spec$ from the valid
+    parameter program sets $\vsa_j \models \spec_j$ for some choice of parameter specifications $\spec_j$.
+    \label{thm:wf:cond}
+\end{theorem}
+\begin{proof}
+    We define the learning procedure for $F$ in \Cref{fig:prose:algorithm} algorithmically.
+    It recursively explores the dependency graph $G(F)$ in a topological order, maintaining a \emph{prerequisite path}
+    $Q$ -- a set of
+    parameters $N_j$ that have already been skolemized, together with their fixed bindings $\values_j$ and valid program
+    sets $\vsa_j$.
+    In the prerequisite path, we maintain the invariant: \emph{for each program set $\vsa_j$ in the path, all programs
+        in it produce the same values $\values_j$ on the provided input states~$\states$}.
+    This allows each conditional witness function $\omega_{i}$ to deduce a spec $\spec_i$ for the current
+    parameter~$N_i$ assuming the bound values $\values_{k_1}, \dots, \values_{k_s}$ for the prerequisites
+    $N_{k_1}, \dots, N_{k_s}$ of $N_i$.
+
+    The program sets in each path are valid for the subproblems deduced by applying witness functions.
+    If all the witness functions in $G(F)$ are precise, then any combination of programs $P_1, \dots, P_k$ from these
+    program sets yields a valid program $F(P_1, \dots, P_k)$ for $\spec$.
+    If some witness functions are imprecise, then a filtered join of parameter program sets for each path is valid
+    for $N$.
+    Thus, the procedure in \Cref{fig:prose:algorithm} computes a valid program set $\vsa \models \spec$.
+\end{proof}
+
+\Cref{thm:wf:noncond,thm:wf:cond} give a \emph{constructive} definition of the refinement procedure that splits the
+search space for $N$ into smaller parameter search spaces for $N_1,\dots,N_k$.
+If the corresponding witness functions are precise, then \emph{every} combination of valid parameter programs from these
+subspaces yields a valid program for the original synthesis problem.
+Alternatively, if some of the accessible witness functions are imprecise, we use them to \emph{narrow down} the
+parameter search space, and filter the constructed program set for validity.
+The $\mathsf{Filter}$ operation (defined in \Cref{ch:vsa}) filters out inconsistent programs from $\vsa$ in time
+proportional to $\clustering$.
+\todoinline{Full example for the search (from the slides).}
+

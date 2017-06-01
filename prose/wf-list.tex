@@ -1,0 +1,55 @@
+\begin{sidewaystable}[p!]
+    \begin{fullpage}
+        \centering
+        % \uwsinglespace
+        \small
+        \begin{tabu}{lX[-1$l]|X[-1$l]X[-1$l]|>{\hspace*{1.2em}}X[-3$l]}
+            \toprule
+            \textbf{Operator} & \textbf{Parameter} & \textbf{Input spec} & \textbf{Prerequisites} & \textbf{Output
+            spec} \\
+            \midrule
+            \dslinline|Concat($atom$,\ $transform$[$inputs$])| & atom & \state \tospec w & &
+                \state \tospec \bigvee\limits_{j=1}^{|w|-1} w[0..j] \\
+                \cmidrule{2-5}
+                & transform & \state \tospec w & atom = v & \state \tospec w[|v|..] \\
+            \midrule
+            \dslinline|ConstStr($s$)| & s & \state \tospec w & & \state \tospec w \\
+            \midrule
+            \dslinline|let\ $x\ $ = $\ \tikzmark{mark:b:Bind}$std.Kth($inputs$,\ $k$)$\tikzmark{mark:e:Bind}\ $ in| &
+              binding & \state \tospec w & &
+              \state \tospec \bigvee\limits_{\mathclap{j\colon w \text{ occurs in } v_j}}\ v_j \\[3pt]
+              \cmidrule{2-5}
+            \qquad\dslinline|Substring($x$,\ $pp[x]$)| & pp & \state \tospec w & x = v & \state \tospec
+              \bigvee\limits_{\mathclap{\substack{w \text{ occurs in } v \\ \text{ at position } l\ \ }}}
+              \ \langle l, l + |w|\rangle \\
+            \midrule
+            \dslinline|AbsPos($x$,\ $k$)| & k & \state \tospec c & x = v & \state \tospec c \vee c - |v| - 1 \\
+            \midrule
+            \dslinline|RegexPos($x$, $\ \tikzmark{mark:b:RR}$std.Pair($r$,\ $r$)$\tikzmark{mark:e:RR}$,\ $k$)| & rr &
+              \state \tospec c & x = v &
+              \state \tospec \bigvee\limits_{\mathclap{\substack{
+                          \langle r_1, r_2 \rangle\colon r_1 \text{ matches left of } c \\
+                          \hspace*{2.5em}\wedge\ r_2 \text{ matches right of } c}}}\ \langle r_1, r_2 \rangle \\
+              \cmidrule{2-5}
+              & k & \state \tospec c & \begin{aligned} &x = v,\\[0pt] &rr = \langle r_1, r_2 \rangle \end{aligned} &
+                  \begin{aligned}
+                      &\state \tospec j \vee j - |\vec{c}| - 1 \quad\text{ where } \\
+                      &\quad \vec{c} \text{ are the match positions of } \langle r_1, r_2 \rangle \text{ in } v, \\
+                      &\quad j \text{ is an index of } c \text{ in } \vec{c}
+                  \end{aligned} \\
+            \bottomrule
+        \end{tabu}
+        \begin{tikzpicture}[overlay, remember picture]
+            \draw[decorate, decoration={brace, mirror}, transform canvas={yshift=-0.3em}]
+                (pic cs:mark:b:Bind) -- (pic cs:mark:e:Bind) node[midway, below] {$binding$};
+        \end{tikzpicture}
+        \begin{tikzpicture}[overlay, remember picture]
+            \draw[decorate, decoration={brace, mirror}, transform canvas={yshift=-0.3em}]
+                (pic cs:mark:b:RR) -- (pic cs:mark:e:RR) node[midway, below] {$rr$};
+        \end{tikzpicture}
+        \todoinline{Witness functions for FlashExtract and the standard library of PROSE.}
+        \caption{Witness functions for various FlashFill operators.}
+        \label{tbl:wfs:flashfill}
+    \end{fullpage}
+\end{sidewaystable}
+
