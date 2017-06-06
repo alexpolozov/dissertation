@@ -1,2 +1,124 @@
 \chapter{Related Work}
 \label{ch:related}
+
+The scope of this work encompasses three large areas: program synthesis, data wrangling, and active learning.
+All three communities have developed numerous alternative solutions to the problems related to the ones I discuss in
+this discuss.
+This chapter presents an overview of related work in both areas, focusing on significant, influential, highly relevant
+papers, as well as comparing and contrasting PROSE with the existing efforts.
+
+\section{Program Synthesis}
+\label{sec:related:synthesis}
+
+In \Cref{ch:intro}, we outlined the main techniques, strengths, and weaknesses of two large families of recent
+program synthesis works, \emph{syntax-guided} and \emph{domain-specific inductive synthesis}.
+The PROSE framework is our contribution to unifying the strengths of both approaches into a single system.
+It follows the recent line of effort in standardizing the program synthesis space and developing generic synthesis
+strategies and frameworks.
+Apart from PROSE, three main initiatives in this space are \textsc{Sketch}~\cite{sketch},
+\textsc{Rosette}~\cite{rosette}, and SyGuS~\cite{sygus}.
+
+\subsection{\textsc{Sketch} and \textsc{Rosette}}
+\textsc{Sketch}, developed by \citet{sketch}, is a pioneering work in the space of program synthesis frameworks.
+It takes as input a partial program, i.e.
+a program template with holes in place of desired subexpressions.
+\textsc{Sketch} translates this template to SAT encoding, and applies counterexample-guided inductive synthesis to fill
+in the holes with
+expressions that satisfy the specification.
+
+\textsc{Rosette} by \citet{rosette} is a DSL\hyp{}parameterized framework, which supports a rich suite of capabilities
+including verification, synthesis, and repair.
+Unlike \textsc{Sketch}, its input language is a limited subset of Racket programming language, which \textsc{Rosette}
+translates to SMT constraints via symbolic execution.
+
+Both \textsc{Sketch} and \textsc{Rosette} allow seamless translation of their input languages (custom C-like in
+\textsc{Sketch} or limited Racket in \textsc{Rosette}) to SAT/SMT encoding at runtime.
+It reduces the level of synthesis awareness required from the developer (\citeauthor{rosette} call this methodology
+\emph{solver-aided programming}).
+However, our experiments show that constraint-based techniques scale poorly to real-world industrial application
+domains, which do not have a direct SMT theory~\cite{andersen:procedural,singh2012synthesizing}.
+To enable program synthesis in such cases, PROSE separates domain-specific insights into \emph{witness
+functions}, and uses a common deductive meta-algorithm in all application domains.
+The resulting workflow is as transparent to the developer as solver-aided programming, but it does not require domain
+axiomatization.
+
+\subsection{Syntax-Guided Synthesis}
+SyGuS~\cite{sygus} is a recent initiative that aims to (a) standardize the input specification language of program
+synthesis problems;
+(b) develop general-purpose synthesis algorithms for these problems, and
+(c) establish an annual competition SyGuS-COMP of such algorithms on a standardized benchmark suite.
+Currently, their input language is also based on SMT theories, which makes it inapplicable for complex industrial
+domains (see \Cref{ch:intro}).
+The main synthesis algorithms in SyGuS are enumerative search \cite{transit:protocols}, constraint-based search
+\cite{bitvectors}, and stochastic search \cite{schkufza2013stochastic}.
+Based on the SyGuS-COMP results, they handle different application domains best, although enumerative search is
+generally effective on medium-sized problems in most settings.
+
+\subsection{Deductive synthesis}
+The \emph{deductive} approach to program synthesis \cite{manna1980deductive} uses a formal system of deduction rules to
+build a constructive definition of a program in a way that proves the program's validity.
+This approach is efficient because at every point it works upon a partially correct program and never needs to eliminate
+erroneous candidates (like enumerative search).
+Its drawback is substantial manual effort to axiomatize the application domain into sound and complete deduction rules.
+
+The deductive search of PROSE is an extension of the described ideas, where we reduce this effort by using local
+deductive rules in the form of domain\hyp{}specific \emph{witness functions}.
+They characterize the behavior of a \emph{single operator} on a \emph{single input}, whereas deduction rules
+historically describe the behavior of \emph{partial programs} on \emph{all inputs}.
+This allows synthesis designers to easily provide domain\hyp{}specific insight for program synthesis in complex DSLs.
+
+\subsection{Type-based synthesis}
+
+Type-based synthesis is another recent area in program synthesis research~\cite{popl16:frankle,polikarpova2016program}.
+It defines a synthesis problem as a problem of \emph{finding a type inhabitant}, and uses the theory of refinement types
+to resolve it.
+A particularly attractive feature of type-based synthesis is that, similarly to PROSE, it uses
+deductive reasoning, building the desired program \emph{top-down} from the specified properties.
+The spec, expressed as a refinement on the program's output value type, can range from input-output
+examples~\cite{popl16:frankle} to fully formalised properties~\cite{polikarpova2016program}, as long as these
+refinements allow logical reasoning.
+The prior work relies on \emph{liquid type inference}~\cite{rondon2008liquid} or conventional inference
+rules~\cite{pldi15:osera} to perform such reasoning.
+
+Program synthesis with refinement types is very effective in domains that enable logical reasoning on simple type
+properties, such as data structures, functional programs, and security verification.
+On these domains it significantly outperforms alternative solutions (constraint solving and enumeration), due to the
+same feature that makes deduction efficient: it always operates on a partially correct program, filling in its holes by
+deducing necessary properties (in this case, refinements) of these holes and applying the same inference recursively.
+Similarly to constraint solves, applying this approach to data wrangling domains would require significant domain
+axiomatization and development of a domain-specific reasoning engine, which is highly non-trivial for industrial
+applications.
+
+\section{Data Wrangling}
+
+Various forms of data cleaning, parsing, and text manipulation have been addressed by the field of data mining.
+Most system for discovering cleaning transformations on the data perform some form of \emph{active learning} by
+combining intelligent search with human assistance.
+Two prominent examples of this idea are Wrangler~\cite{wrangler} (later Trifacta) and DataXFormer~\cite{dataxformer}.
+
+Both Wrangler and DataXFormer apply an algorithm similar to enumerative search in program synthesis to discover
+transformations.
+However, they significantly differ in their (a) search space, and (b) kind of specification from a human.
+
+Wrangler employs a method coined \emph{predictive interaction}, where at each step in the session the system makes a
+conjecture about an atomic transformation step that the user might want to apply on the dataset next.
+To enable such interaction, their search space is a large loosely-connected DSL of standard atomic transformations.
+In contrast, in PBE-based approaches the program being synthesized is an end-to-end sequence of multiple transformation
+steps.
+This makes the system much more accessible to end users (who do not necessarily understand an exact sequence of steps
+that should be applied), but also increases the level of ambiguity, since the number of programs consistent with a given
+set of input-output examples grows exponentially with program size.
+
+DataXFormer builds transformations that combine together multiple data sources, such as web table or knowledge bases.
+It does not have a pre-defined DSL of transformations, inferring them automatically.
+In order to enable automatic inference of transformations (which may require domain-specific knowledge or table lookup),
+DataXFormer involves a human at each step of the search process, presenting partial results and asking for
+clarifications, additional transformation examples, and data filtering.
+The key component of this system is \emph{table discovery}, which determines which data sources from a giant data lake
+may be relevant to the given example-based query.
+Since DataXFormer is interactive at every step, it can employ an EM-based ranking algorithm for resolving this
+ambiguity~\cite{dataxformer}.
+The confidence scores associated with each table are seeded with the number of examples it covers, and then iteratively
+recomputed as DataXFormer changes its beliefs about relevance of each table and each data point to the answer.
+
+\section{Active Learning}

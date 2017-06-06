@@ -136,7 +136,7 @@ possible.
     We define the learning procedure for $F$ in \Cref{fig:prose:algorithm} algorithmically.
     It recursively explores the dependency graph $G(F)$ in a topological order, maintaining a \emph{prerequisite path}
     $Q$ -- a set of
-    parameters $N_j$ that have already been skolemized, together with their fixed bindings $\values_j$ and valid program
+    parameters $N_j$ that have already been skolemized, together with their fixed bindings~$\values_j$ and valid program
     sets $\vsa_j$.
     In the prerequisite path, we maintain the invariant: \emph{for each program set $\vsa_j$ in the path, all programs
         in it produce the same values $\values_j$ on the provided input states~$\states$}.
@@ -160,5 +160,63 @@ Alternatively, if some of the accessible witness functions are imprecise, we use
 parameter search space, and filter the constructed program set for validity.
 The $\mathsf{Filter}$ operation (defined in \Cref{ch:vsa}) filters out inconsistent programs from $\vsa$ in time
 proportional to $\clustering$.
-\todoinline{Full example for the search (from the slides).}
 
+\begin{sidewaysfigure}[p!]
+    \begin{fullpage}
+        \centering
+        \input{algorithm-example}
+        \large
+        \vspace*{-\baselineskip}
+        \begin{equation*}
+            \spec\colon\ \stringliteral{(202) 555-0126} \tospec \stringliteral{202}
+            \quad
+            \spec_1\colon\ \stringliteral{(202) 555-0126} \tospec \stringliteral{2} \,\vee\, \stringliteral{20}
+            \quad
+            \begin{aligned}[t]
+                &\spec_{21}\colon\ \stringliteral{(202) 555-0126} \tospec \stringliteral{02} \\[-0.3\baselineskip]
+                &\spec_{22}\colon\ \stringliteral{(202) 555-0126} \tospec \stringliteral{2}
+            \end{aligned}
+        \end{equation*}
+        \caption{An illustrative diagram showing the outermost layer of deductive search for a given problem
+        $\mathsf{Learn}\left(\mathtt{transform}\,,\, \stringliteral{(202) 555-0126} \tospec \stringliteral{202}\right)$.
+        Solid blue arrows show the recursive calls of the search process (the search subtrees below the outermost layers
+        are not expanded and shown as ``\dots'').
+        Rounded orange blocks and arrows shows the nested iterations of the \textsc{LearnPaths} procedure from
+        \Cref{fig:prose:algorithm}.
+        Dotted green arrows show the VSA structure that is returned to the caller.}
+        \label{fig:prose:algorithm:example}
+    \end{fullpage}
+\end{sidewaysfigure}
+
+\begin{example}
+    \Cref{fig:prose:algorithm:example} shows an illustrative diagram for the outermost layer of the learning process for
+    the \dslinline|$transform$| symbol from $\ffdsl$ and a given spec $\spec = \stringliteral{(202) 555-0126} \tospec
+    \stringliteral{202}$.
+    First, the framework splits the search process into two branches: one for \dslinline|Concat($atom$, $transform$)|
+    and one for \dslinline|$atom$|, according to the definition of \dslinline|$transform$| in $\ffdsl$.
+    The figure shows the outermost layer of the first branch.
+
+    The \textsc{LearnPaths} procedure first invokes the witness function $\omega_a$ for the first
+    parameter $atom$ of the \dslinline|Concat| rule.
+    It returns a necessary spec $\spec_1 = \state \tospec \stringliteral{2} \,\vee\,
+    \stringliteral{20}$ for the $atom$ symbol (where $\state$ is the shared input state from $\spec$).
+    The PROSE framework then recursively resolves this spec into a VSA $\vsa_1$ of all $atom$ programs that satisfy
+    $\spec_1$.
+
+    Next, the \textsc{LearnPaths} procedure clusters $\vsa_1$ and splits its further execution into two branches, one
+    per each cluster of programs in $\vsa_1$ that give the same output on the given input state $\state$.
+    There are two clusters: programs $\vsa'_1$ that return $o_1 = \stringliteral{2}$ and programs $\vsa'_2$ that return
+    $o_2 = \stringliteral{20}$.
+    For each of them the PROSE framework independently invokes a nested call to \textsc{LearnPaths} with the
+    corresponding output binding for $atom$ (i.e. $o_1$ or $o_2$ respectively) recorded in the prerequisite path $Q$.
+    Within each nested invocation, \textsc{LearnPaths} constructs a necessary and sufficient spec on the second
+    parameter $transform$ of \dslinline|Concat| by invoking its conditional witness function $\omega_t$.
+    It returns a spec $\spec_{21}\colon\ \state \tospec \stringliteral{02}$ for the branch with $o_1 =
+    \stringliteral{2}$ and a spec $\spec_{22}\colon\ \state \tospec \stringliteral{2}$ for the branch with $o_2 =
+    \stringliteral{20}$, respectively.
+    The framework then recursively resolves them into the corresponding program sets $\vsa_{21}$ and $\vsa_{22}$.
+
+    Since both witness functions $\omega_a$ and $\omega_t$ are precise, the final result returned from
+    \textsc{LearnPaths} is the VSA $\vsaunion\left\{ \joinCons[\mathsf{Concat}]\left(\vsa'_1,\, \vsa_{21}\right),\,
+    \joinCons[\mathsf{Concat}]\left(\vsa'_2,\, \vsa_{22}\right) \right\}$.
+\end{example}
