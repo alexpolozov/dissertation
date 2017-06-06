@@ -75,8 +75,8 @@ possible.
             \Given{G(F)}{dependency graph of witness functions for the rule $F$}
             \Given{\spec}{specification for the rule $F$}
             \Functionx{LearnRule}{$G(F), \spec$}
-            \State Permutation $\pi \gets \mathsf{TopologicalSort}(G(F))$
-            \State $\vsa \gets \bigvsaunion \bigl\{ \vsa' \bigmid \vsa' \in \Call{LearnPaths}{G(F), \spec, \pi, 1, \varnothing} \bigr\}$
+            \State Permutation $\constraint \gets \mathsf{TopologicalSort}(G(F))$
+            \State $\vsa \gets \bigvsaunion \bigl\{ \vsa' \bigmid \vsa' \in \Call{LearnPaths}{G(F), \spec, \constraint, 1, \varnothing} \bigr\}$
             \If{all witness functions in $G(F)$ are precise}
             \State \Return $\vsa$
             \Else
@@ -84,15 +84,15 @@ possible.
             \EndIf
             \EndFunction
             \Statex
-            \Given{\pi}{permutation of the parameters of $F$}
-            \Given{i}{index of a current deduced parameter in $\pi$}
+            \Given{\constraint}{permutation of the parameters of $F$}
+            \Given{i}{index of a current deduced parameter in $\constraint$}
             \Given{Q}{a mapping of prerequisite values $\values_{k}$ and corresponding learnt program sets $\vsa_{k}$ on the current path}
-            \Functionx{LearnPaths}{$G(F), \spec, \pi, i, Q$}
+            \Functionx{LearnPaths}{$G(F), \spec, \constraint, i, Q$}
             \If{$i > k$}
             \State Let $\vsa_1, \dots, \vsa_k$ be learnt program sets for $N_1, \dots, N_k$ in $Q$
             \State \Return $\left\{ \joinCons(\vsa_1, \dots, \vsa_k) \right\}$
             \EndIf
-            \State $p \gets \pi_i$ \Comment{Current iteration deduces the rule parameter $N_p$}
+            \State $p \gets \constraint_i$ \Comment{Current iteration deduces the rule parameter $N_p$}
             \State Let $\omega_{p}(\spec \assuming N_{k_1} = \values_1, \dots, N_{k_m} = \values_m)$ be the witness
             function for $N_{p}$
             \Statex \Comment{Extract the prerequisite values for $N_{p}$ from the mapping $Q$}
@@ -107,13 +107,13 @@ possible.
             \Statex \Comment{If no other parameters depend on $N_{p}$, proceed without clustering}
             \If{$N_{p}$ is a leaf in $G(F)$}
             \State $Q' \gets Q[p := \top \mapsto \vsa_{p}]$
-            \State \Return \Call{LearnPaths}{$G(F), \spec, \pi, i+1, Q'$}
+            \State \Return \Call{LearnPaths}{$G(F), \spec, \constraint, i+1, Q'$}
             \Statex \Comment{Otherwise cluster $\vsa_{p}$ on $\states$ and unite the results across branches}
             \Else
             \State $\states \gets$ the input states associated with $\spec$
             \ForAll{$\bigl(\values'_j \mapsto \vsa'_{s,j}\bigr) \in \clustering[\vsa_p][\states]$} \label{alg:line:clusters}
             \State $Q' \gets Q\bigl[s := \values'_j \mapsto \vsa'_{s,j}\bigr]$
-            \State \Yield \textbf{all} \Call{LearnPaths}{$G(F), \spec, \pi, i+1, Q'$}
+            \State \Yield \textbf{all} \Call{LearnPaths}{$G(F), \spec, \constraint, i+1, Q'$}
             \EndFor
             \EndIf
             \EndFunction
@@ -217,6 +217,135 @@ proportional to $\clustering$.
     The framework then recursively resolves them into the corresponding program sets $\vsa_{21}$ and $\vsa_{22}$.
 
     Since both witness functions $\omega_a$ and $\omega_t$ are precise, the final result returned from
-    \textsc{LearnPaths} is the VSA $\vsaunion\left\{ \joinCons[\mathsf{Concat}]\left(\vsa'_1,\, \vsa_{21}\right),\,
+    \textsc{LearnPaths} is the VSA $\bigvsaunion\left\{ \joinCons[\mathsf{Concat}]\left(\vsa'_1,\, \vsa_{21}\right),\,
     \joinCons[\mathsf{Concat}]\left(\vsa'_2,\, \vsa_{22}\right) \right\}$.
 \end{example}
+
+\begin{figure}[t]
+    \centering
+    \small
+    \uwsinglespace
+    \begin{subfigure}[t]{\textwidth}
+        \subcaptionbox{\label{fig:topdown:spec}}{\hphantom{(a)}}\vspace{-1.5\baselineskip}
+        \begin{mathpar}
+            \infer{ N := F_1(N_1, \dots, N_k) \;|\; F_2(M_1, \dots, M_n) \\\\
+            \text{\textsc{LearnRule}}(G(F_1), \spec) = \vsa_1\ \quad\ \text{\textsc{LearnRule}}(G(F_2), \spec) = \vsa_2}
+            {\mathsf{Learn}(N, \spec) = \vsa_1 \vsaunion \vsa_2}
+            \quad\infer{  }{\mathsf{Learn}(N, \top) = \dsl|_N}
+            \\ \infer
+            {\forall j = 1..2\colon \mathsf{Learn}(N, \spec_j) = \vsa_j}
+            {\mathsf{Learn}(N, \spec_1 \wedge \spec_2) = \vsa_1 \cap \vsa_2}
+            \quad \infer
+            {\forall j = 1..2\colon \mathsf{Learn}(N, \spec_j) = \vsa_j}
+            {\mathsf{Learn}(N, \spec_1 \vee \spec_2) = \vsa_1 \vsaunion \vsa_2}
+            \quad\infer{  }{\mathsf{Learn}(N, \spec) = \mathsf{Filter}(\dsl|_N, \spec)}
+            \\ \infer
+            {\mathsf{Learn}(N, \spec_1) = \vsa \quad \spec_2 = \neg \langle \state, \constraint\rangle}
+            {\mathsf{Learn}(N, \spec_1 \wedge \spec_2) = \mathsf{Filter}(\vsa, \spec_2)}
+            \quad \infer
+            {N := F(N_1, \dots, N_k) \\\\ \text{All witness functions in $G(F)$ accept $\spec$}}
+            {\mathsf{Learn}(N, \spec) = \text{\textsc{LearnRule}}(G(F), \spec)} \\
+        \end{mathpar}
+    \end{subfigure}
+    \begin{subfigure}[t]{\textwidth}
+        \subcaptionbox{\label{fig:wf:syntax}}{\hphantom{(b)}}\vspace{-\baselineskip}
+        \begin{mathpar}
+            \quad\infer
+            {N := \text{let } x = e_1 \text{ in } e_2}
+            {\omega_{e_2}(\spec \assuming e_1 = v) = \state[x := v] \rightsquigarrow \spec}
+            \quad\infer
+            {N \text{ is a literal }}
+            {\mathsf{Learn}(N, \state \rightsquigarrow v) = \left\{v\right\}}
+            \\ \infer
+            {N \text{ is a variable}}
+            {\mathsf{Learn}(N, \state \rightsquigarrow \constraint) = \left\{N\right\} \text{if } \constraint(\state[N]) \text{ else } \emptyset}
+        \end{mathpar}
+    \end{subfigure}
+    \caption{\textbf{(a)} Constructive inference rules for processing of boolean connectives in the inductive specifications $\spec$;
+    \textbf{(b)} Witness functions and inference rules for common syntactic features of PROSE DSLs: \texttt{let} definitions, variables, and literals.}
+    \label{fig:topdown:common}
+\end{figure}
+
+\paragraph{Handling Boolean Connectives}
+Witness functions for DSL operators (such as the ones in \Cref{tbl:wfs:flashfill}) are typically defined on the
+\emph{atomic} constraints (such as equality or subsequence predicates).
+To complete the definition of deductive search, \Cref{fig:topdown:spec} gives inference rules for handling
+of boolean connectives in a spec $\spec$.
+Since a spec is defined as a NNF, we give the rules for handling conjunctions and disjunctions of specs, and
+positive/negative literals.
+These rules directly map to corresponding VSA operations:
+
+\begin{theorem} \leavevmode
+    \begin{enumerate}[nosep, label=(\arabic*)]
+        \item $\vsa_1 \models \spec_1$ and $\vsa_2 \models \spec_2$ $\ \Longleftrightarrow\ $ $\vsa_1 \vsaunion \vsa_2 \models \spec_1 \vee \spec_2$.
+        \item $\vsa_1 \models \spec_1$ and $\vsa_2 \models \spec_2$ $\ \Longleftrightarrow\ $ $\vsa_1 \cap \vsa_2 \models \spec_1 \wedge \spec_2$.
+        \item $\vsa \models \spec_1$ $\ \Longleftrightarrow\ $ $\mathsf{Filter}(\vsa, \spec_2) \models \spec_1 \wedge \spec_2$.
+    \end{enumerate}
+    \label{thm:connectives:vsa}
+\end{theorem}
+
+Handling negative literals is more difficult.
+They can only be efficiently resolved in two cases:
+\begin{enumerate*}[label=(\alph*)]
+    \item if a witness function supports the negated spec directly, or
+    \item if the negative literal occurs in a conjunction with a positive literal, in which case we use the latter to
+        generate a base set of candidate programs, which is then filtered to also satisfy the former
+\end{enumerate*}.
+If neither (a) nor (b) holds, the set of programs satisfying a negative literal is bounded only by the DSL.
+
+% Our pre-defined generic witness functions in \Cref{fig:wf:library}, together with witness functions for common syntactic
+% features of PROSE DSLs (\texttt{let} rules, variables, and literals) constitute the PROSE standard library.
+
+\paragraph{Search Tactics}
+\Cref{thm:wf:cond,thm:connectives:vsa,fig:topdown:common} entail a non-deterministic choice among numerous possible ways
+to explore the program space deductively.
+For instance, one can have many different witness functions for the same operator $F$ in $G(F)$, and they may deduce subproblems of
+different complexity.
+A specific exploration choice in the program space constitutes a \emph{search tactic} over a DSL.
+We have identified several effective generic search tactics, with different advantages and disadvantages;
+however, a comprehensive study on their selection is left for future work.
+
+Consider a conjunctive problem $\mathsf{Learn}(N, \spec_1 \wedge \spec_2)$.
+One possible way to solve it is given by \Cref{thm:connectives:vsa}: handle two conjuncts independently, producing VSAs
+$\vsa_1$ and $\vsa_2$, and intersect them.
+This approach has a drawback: the complexity of VSA intersection is quadratic.
+Even if $\spec_1$ and $\spec_2$ are inconsistent (i.e. $\vsa_1 \cap \vsa_2 = \emptyset$), each conjunct individually may
+be satisfiable.
+In this case the unsatisfiability of the original problem is determined only after $T(\mathsf{Learn}(N, \spec_1)) +
+T(\mathsf{Learn}(N, \spec_2)) + \mathcal{O}(\volume{\vsa_1} \cdot \volume{\vsa_2})$ time.
+
+An alternative search tactic for conjunctive specs arises when $\spec_1$ and $\spec_2$ constrain \emph{different} input
+states $\state_1$ and $\state_2$, respectively.
+In this case each conjunct represents an independent ``world'', and witness functions can deduce subproblems in each
+``world'' independently and concurrently.
+PROSE applies witness functions to each conjunct in the specification in parallel, conjuncts the resulting parameter
+specs, and makes a single recursive learning call.
+Such ``parallel processing'' of conjuncts in the spec continues up to the terminal level, where the deduced sets of
+concrete values for each terminal are intersected across all input states.\footnote{
+    The ``parallel'' approach can also be thought of as a deduction over a new isomorphic DSL,
+    in which operators (and witness functions) are straightforwardly lifted to accept \emph{tuples} of values
+    instead of single values.}
+
+The main benefit of this approach is that unsatisfiable branches are eliminated much sooner.
+For instance, if among $m$ I/O examples one example is inconsistent with the rest, a parallel approach
+approach discovers it as soon as the relevant DSL level is reached, whereas an intersection-based approach has to first
+construct $m$ VSAs (of which one is empty) and intersect them.
+Its main disadvantage is that in presence of disjunction the number of branches grows exponentially in a number of input
+states in the specification.
+
+\paragraph{Optimizations}
+PROSE performs many practical optimizations in the algorithm in \Cref{fig:prose:algorithm}.
+We parallelize the loop in \Cref{alg:line:clusters}, since it explores non-intersecting portions of the program space.
+For ranked synthesis, we only calculate top $k$ programs for leaf nodes of $G(F)$, provided the ranking
+function is monotonic.
+We also cache synthesis results for every distinct learning subproblem $\langle N, \spec\rangle$, which makes
+deductive search an instance of \emph{dynamic programming}.
+This optimization is crucial for efficient synthesis of many common DSL operators, as we explain in more details in
+\Cref{sec:prose:evaluation:casestudies}.
+
+For bottom portions of the DSL we switch to enumerative
+search~\cite{transit:protocols}, which in such conditions is more efficient than deduction, provided no constants need
+to be synthesized.
+In principle, every subproblem $\mathsf{Learn}(N, \spec)$ in PROSE can be solved by any sound strategy, not
+necessarily deduction or enumerative search.
+Possible alternatives include constraint solving or stochastic techniques~\cite{sygus}.
