@@ -262,39 +262,6 @@ However, in \Cref{sec:prose:evaluation:experiments} I show that these values usu
     \label{fig:vsa:language-repr}
 \end{figure}
 
-\begin{figure}
-    \centering
-    \small
-    \begin{algorithmic}[1]
-        \Functionx{VsaToDsl}{VSA $\vsa$}
-            \State Let $V$ be a set of fresh nonterminals, one per each non-leaf node in $\vsa$
-            \State Let $\Sigma$ be a set of fresh terminals, one per each leaf node in $\vsa$
-            \State \Comment{We write $\mathsf{sym}(\vsa') \in V \cup \Sigma$ to denote the corresponding fresh symbol
-                for a node $\vsa'$ from $\vsa$}
-            \addtocounter{ALG@line}{-1}
-            \WithNumber \State Productions $R \gets \emptyset$
-            \State \Comment{Create ``symbol $:=$ symbol'' productions for all union nodes}
-            \ForAll{union nodes $\vsa' = \vsaunion(\vsa_1, \dots, \vsa_k)$ in $\vsa$}
-                \State $R \gets R \cup \{ \mathsf{sym}(\vsa') := \mathsf{sym}(\vsa_i) \mid i = 1 \dots k \}$
-            \EndFor
-            \State \Comment{Create operator productions for all join nodes}
-            \ForAll{join nodes $\vsa' = \vsajoin(\vsa_1, \dots, \vsa_k)$ in $\vsa$}
-                \State $R \gets R \cup \{ \mathsf{sym}(\vsa') := F(\mathsf{sym}(\vsa_1), \dots, \mathsf{sym}(\vsa_k)) \}$
-            \EndFor
-            \State \Comment{Annotate terminal symbols with values extracted from leaf nodes}
-            \ForAll{leaf nodes $\vsa' = \{ P_1, \dots, P_k \}$ in $\vsa$}
-                \State Annotate in $\Sigma$ that $\mathsf{sym}(\vsa') \in \{ P_1, \dots, P_k \}$
-            \EndFor
-            \State \Return the context-free grammar $G = \langle V, \Sigma, R, \mathsf{sym}(\vsa)\rangle$
-        \EndFunction
-    \end{algorithmic}
-    \uwsinglespace
-    \vspace*{\baselineskip}
-    \caption{An algorithm for translating a VSA $\vsa$ of programs in a DSL $\dsl$ into an isomorphic grammar for a
-        sub-DSL $\dsl' \subset \dsl$.}
-    \label{fig:vsa:incremental}
-\end{figure}
-
 Another view on a version space algebra is that it is a different representation of a \emph{language}, isomorphic to a
 context-free grammar (CFG).
 In formal logic, a language is defined as a set of programs.
@@ -310,8 +277,3 @@ represents a finite sub-language of this DSL.
 This observation is important because it allows us (with careful implementation) to treat VSAs and CFGs interchangeably.
 Such treatment is the main driver behind seamless \emph{incremental program synthesis} in the PROSE framework, which I
 describe in \Cref{sec:interactive:incremental}.
-
-\Cref{fig:vsa:incremental} shows an algorithm for translating $\vsa$ into a grammar of $\dsl'$.
-It performs an isomorphic graph translation, converting VSA unions ($\vsaunion$) into CFG alternatives ($N := N_1 \palt
-N_2$), VSA joins~($\vsajoin$) into CFG operator productions ($N := F(\dots)$), and explicit program sets into CFG
-terminals annotated with their possible values.
