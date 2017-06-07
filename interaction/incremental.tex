@@ -28,11 +28,23 @@ $\constraint_i$, since the DSL $\dsl_i$ by construction only contains programs t
 $\constraint_1, \dots, \constraint_{i-1}$.
 
 As part of our envisioned learner-user interaction process, the conversion of $\vsa_i$ into $\dsl_{i+1}$ is also the job
-of the synthesizer.
+of the hypothesizer.
 In \Cref{fig:feedback:hypothesizer}, it is shown as an automatic feedback with a ``refined DSL $\dsl'$'', leading back
 into the learner.
 
 \subsection{VSA Conversion}
+
+Recall that in \Cref{sec:vsa:language}, we have established that a VSA $\vsa$ over a DSL $\dsl$ is isomorphic to a
+context-free grammar of a sub-DSL $\dsl' \subset \dsl$.
+\Cref{fig:vsa:incremental} shows an algorithm for translating $\vsa$ into a grammar of $\dsl'$.
+It performs an isomorphic graph translation, converting VSA unions ($\vsaunion$) into CFG alternatives ($N := N_1 \palt
+N_2$), VSA joins~($\vsajoin$) into CFG operator rules ($N := F(\dots)$), and explicit program sets into CFG terminals
+annotated with their possible values.
+
+Note that as a subset of $\dsl$, the new DSL $\dsl'$ does not introduce any new operators.
+Thus, all witness functions for $\dsl$ are still applicable for synthesis in $\dsl'$.
+Moreover, $\dsl'$ is finite and its terminals are annotated with explicit sets of permitted values, which allows fast learning of constants
+for any spec type simply via set filtering.
 
 \begin{figure}[t]
     \centering
@@ -66,18 +78,6 @@ into the learner.
         sub-DSL $\dsl' \subset \dsl$.}
     \label{fig:vsa:incremental}
 \end{figure}
-
-Recall that in \Cref{sec:vsa:language}, we have established that a VSA $\vsa$ over a DSL $\dsl$ is isomorphic to a
-context-free grammar of a sub-DSL $\dsl' \subset \dsl$.
-\Cref{fig:vsa:incremental} shows an algorithm for translating $\vsa$ into a grammar of $\dsl'$.
-It performs an isomorphic graph translation, converting VSA unions ($\vsaunion$) into CFG alternatives ($N := N_1 \palt
-N_2$), VSA joins~($\vsajoin$) into CFG operator rules ($N := F(\dots)$), and explicit program sets into CFG terminals
-annotated with their possible values.
-
-Note that as a subset of $\dsl$, the new DSL $\dsl'$ does not introduce any new operators.
-Thus, all witness functions for $\dsl$ are still applicable for synthesis in $\dsl'$.
-Moreover, $\dsl'$ is finite and its terminals are annotated with explicit sets of permitted values, which allows fast learning of constants
-for any spec type simply via set filtering.
 
 \subsection{Constraint Resolution}
 Deductive synthesis relies on existence of witness functions, which backpropagate constraints top-down through the
@@ -188,6 +188,15 @@ iteration) and all intermediate specs produced by witness functions (required to
 \end{proof}
 
 \subsection{Evaluation}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{figures/incremental-learning-performance}
+    \caption{Speedups obtained by the incremental synthesis algorithm vs. the non-incremental algorithm.
+        Values higher above the $y=1$ line (where the runtimes are equal) are better.}
+    \label{fig:interactive:incremental:speedup}
+\end{figure}
+
 We evaluate the incremental synthesis algorithm in the context of the FlashFill DSL.
 For this case study, we picked all the scenarios which required the user to provide two or more examples to learn a
 correct program, from among our collected FlashFill scenarios.
@@ -205,11 +214,3 @@ Further, the incremental algorithm achieves a geometric mean speedup of 1.42 ove
 the 108 scenarios considered for the FlashFill DSL.
 Despite the relatively small number of learning iterations, our evaluation demonstrates that incrementality yields
 significant performance improvements.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.99\linewidth]{figures/incremental-learning-performance}
-    \caption{Speedups obtained by the incremental synthesis algorithm vs. the non-incremental algorithm.
-        Values higher above the $y=1$ line (where the runtimes are equal) are better.}
-    \label{fig:interactive:incremental:speedup}
-\end{figure}

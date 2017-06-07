@@ -36,13 +36,12 @@ Finally, feedback and proactiveness increases the user's confidence and trust in
 
 \begin{figure}[t]
     \centering
-    \uwsinglespace
     \begin{tikzpicture}[flowchart]
         \node [actor] (learner) {Learner};
         \node [actor, right=3cm of learner] (user) {User};
         \path (learner) to coordinate[midway] (mid) (user);
         \node [actor, above=3.0cm of mid] (analyzer) {Hypothesizer};
-        \node [data, left=of learner] (ranking) {Ranking \\ function $h$};
+        \node [data, left=of learner] (ranking) {Ranking function $h$};
         \draw (ranking) to (learner);
         \draw (learner) to ["VSA $\vsa$" {edgelabel, pos=0.33}, bend left=20]
             node[empty, pos=0.85] (lstart) {}
@@ -61,7 +60,14 @@ Finally, feedback and proactiveness increases the user's confidence and trust in
         \draw[pass] (rstart) to["refined spec $\spec'$"' edgelabel, bend right=20] (rend);
         \draw[pass] (lstart) to["refined DSL $\dsl'$"' edgelabel, bend right=30] (lend);
     \end{tikzpicture}
-    \caption{Learner-user communication in interactive PBE.}
+    \uwsinglespace
+    \caption{Learner-user communication in interactive PBE.
+        At each iteration, the hypothesizer takes from the learner the VSA $\vsa$ of the programs consistent with the
+        current spec $\spec$, and performs two automatic optimizations:
+        (i) it converts the VSA into a refined DSL $\dsl'$ to be used at the next iteration instead of the original DSL
+        $\dsl$, and
+        (ii) it constructs the most effective clarifying question $q$ to ask the user about the ambiguous candidates in
+        $\vsa$, and converts the user's response $r$ into the corresponding refined spec $\spec'$.}
     \label{fig:feedback:hypothesizer}
 \end{figure}
 
@@ -290,6 +296,7 @@ never exceeds 4 (specifically, 90 tasks with 1 false positive, 22 with 2, and 1 
         \textbf{6} & 1 & 1 &   &   &   \\
         \bottomrule
     \end{tabular}
+    \uwsinglespace
     \caption{Number of rows inspected in the baseline and the feedback-driven settings for the evaluation of
         a feedback-driven FlashFill interaction with a ranking-based disambiguation score.
         The data is presented as a histogram: for example, there were \textbf{20/457} scenarios such that the baseline

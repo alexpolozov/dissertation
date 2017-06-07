@@ -169,4 +169,48 @@ We share some anecdotes of PROSE simplifying synthesizer development below.
 
 \subsection{Experiments}
 \label{sec:prose:evaluation:experiments}
-\todoinline{Evaluation}
+
+\begin{figure}[p!]
+    \centering
+    \begin{tikzpicture}
+        \node[anchor=south west, inner sep=0] (img) at (0,0) {\includegraphics[width=\textwidth]{figures/perf}};
+        \begin{scope}[x={(img.south east)}, y={(img.north west)}]
+            \node[inner sep=10pt, rounded corners, fill=Tan] at (0.3, 1) {FlashFill};
+            \node[inner sep=10pt, rounded corners, fill=Tan] at (0.78, 1) {FlashExtract};
+            \node[fill=white] at (0.3, 0.02) { Number of examples };
+            \node[fill=white] at (0.78, 0.02) { Number of examples };
+            \node[fill=white, rotate=90] at (0.03, 0.52) { Average learning time (Log) };
+        \end{scope}
+    \end{tikzpicture}
+    \caption{Performance evaluation of the reimplementations of FlashFill~\cite{flashfill} and
+    FlashExtract~\cite{flashextract} on top of the PROSE framework.
+    Each dot shows average learning time per iteration on a given scenario.
+    The scenarios are clustered by the number of examples (iterations) required to complete the task.
+    \emph{Left:} 531 FlashFill scenarios.
+    \emph{Right:} 6464 FlashExtract scenarios.}
+    \label{fig:prose:evaluation:perf}
+\end{figure}
+
+\paragraph{Domain-specific tools}
+\Cref{fig:prose:evaluation:perf} shows performance and the number of examples of our FlashFill and FlashExtract
+reimplementations on top of the PROSE framework.
+The overall performance is comparable to that of the original system, even though the implementations differ
+drastically.
+For example, the runtime of the original implementation of FlashExtract varies from 0.1 to 4 sec, with a median of 0.3
+sec~\cite{flashextract}.
+The new implementation (despite being more expressive and built on a general-purpose framework) has a runtime of
+$0.5-3$x the original implementation, with a median of 0.6 sec.
+This performance is sufficient for the PROSE-based implementation to be successfully used in industry instead of the
+original one.
+
+\todoinline{VSA volume graph}
+
+\paragraph{Generic tools}
+Comparing PROSE to general-purpose meta\hyp{}synthesizers proved challenging.
+The synthesis procedures of the most related projects (\textsc{Sketch}~\cite{sketch} and
+\textsc{Rosette}~\cite{rosette}) are currently defined only for DSLs based on SMT theories.
+In contrast, our case studies explore domains with rich semantics, such as regular expressions or webpage DOM.
+Even most recent extensions of the Z3 SMT solver to strings~\cite{z3str} lack expressiveness to model such DSLs.
+We believe that lowering the FlashExtract DSL, for instance, to theory of arrays would deem an unfair comparison because
+of huge size of the resulting encoding.
+Therefore we leave comparison of complementary meta-synthesis approaches to future work.

@@ -99,7 +99,6 @@ The user can also mark incorrect table rows as negative examples.
 \end{figure}
 
 \begin{figure}[t]
-    \uwsinglespace
     \begin{tcbraster}[beamer, raster columns=1, size=minimal]
         \centering
         \tcbincludegraphics[scale=0.7]{figures/07-author-disambiguation-full}
@@ -242,7 +241,7 @@ The three files are the following:
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.7\columnwidth]{figures/hydrogenhybrid}
-    \caption{Highlighting for obtaining~\Cref{fig:interactive:evaluation:biosample}.}
+    \caption{Highlighting in the \InputTextView for obtaining~\Cref{fig:interactive:evaluation:biosample}.}
     \label{fig:interactive:evaluation:highlighting}
 \end{figure}
 
@@ -314,7 +313,9 @@ We analyzed the data both from the logs collected by the UI instrumentation, and
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.6\columnwidth]{figures/error-plot1}
-    \caption{Distribution of error count across environments.
+    \uwsinglespace
+    \caption{Distribution of error counts across the three environments in the user study of data wrangling in
+        \FlashProg.
         Both \ConversationalClarification{} (\ConversationalClarificationInitials) and
         \ProgramNavigation{} (\ProgramNavigationInitials) significantly decrease the number of errors.}
     \label{fig:interactive:study:errorcounts}

@@ -1,2 +1,52 @@
-\section{Discussion}
+\section{Strengths and Limitations}
 \label{sec:prose:discussion}
+The methodology of deductive search that lies at the core of PROSE works best under the following conditions:
+
+\paragraph{Decidability}
+A majority of the DSL should be characterized by witness functions, capturing a subset of inverse semantics of the DSL
+operators.
+
+An example of an operator that cannot be characterized by any witness function is an integral multivariate polynomial
+$\mathsf{Poly}(a_0, \dots, a_k, X_1, \dots, X_n)$.
+Here $a_0, \dots, a_k$ are integer polynomial coefficients, which are input variables in the DSL,
+and $X_1, \dots, X_n$ are integer nonterminals in the DSL.
+Given a specification $\spec = (a_0, \dots, a_k) \tospec y$ stating that a specific $\mathsf{Poly}$ executed with
+coefficients $a_0, \dots, a_k$ evaluated to $y$ on \emph{some} $X_1, \dots, X_n$, a witness function~$\omega_j$ has to
+find a set of possible values for $X_j$.
+This requires finding roots of a multivariate integral polynomial, which is undecidable.
+
+\paragraph{Deduction}
+Witness functions should not introduce many disjunctions.
+Each disjunct (assuming it can be materialized by at least one program) starts a new deduction branch.
+In certain domains this problem can only be efficiently solved with a corresponding SMT solver.
+
+Consider the bitwise operator $\mathsf{BitOr}\colon (\mathsf{Bit32}, \mathsf{Bit32}) \to \mathsf{Bit32}$.
+Given a specification $\state \tospec b$ where $b\colon \mathsf{Bit32}$, witness functions for $\mathsf{BitOr}$
+have to construct each possible pair of bitvectors $\langle b_1, b_2\rangle$ such that $\mathsf{BitOr}(b_1, b_2) = b$.
+If $b = 2^{32} - 1$, there exist $3^{32}$ such pairs.
+A deduction over $3^{32}$ branches is infeasible.
+
+\paragraph{Performance}
+Witness functions should be efficient, preferably polynomial in low degrees over the specification size.
+
+Consider the multiplication operator $\mathsf{Mul}\colon (\mathsf{Int}, \mathsf{Int}) \to \mathsf{Int}$.
+Given a specification $\state \tospec n$ with a multiplication result, a witness function for $\mathsf{Mul}$
+has to factor $n$.
+This problem is decidable, and the number of possible results is at most $\mathcal{O}(\log n)$, but the factoring itself
+is infeasible for large $n$.
+
+\paragraph{}
+\indent All counterexamples above feature real-life operators, which commonly arise in embedded systems, control theory,
+and other domains.
+The best known synthesis strategies for them are based on specialized SMT solvers~\cite{sygus}.
+On the other hand, to our knowledge PROSE is the \emph{only} synthesis strategy when the following (also real-life)
+conditions hold:
+\begin{itemize}[nosep]
+    \item The DSL contains arbitrary executable operators that manipulate domain-specific objects with rich semantics.
+    \item The programs may contain domain-specific constants.
+    \item The specifications are inherently ambiguous, and resolving user's intent requires learning a set of valid
+        programs to enable ranking or additional user interaction.
+    \item The engineering and maintenance cost of a PBE\hyp{}based tool is limited by industrial budget and available
+        developers.
+\end{itemize}
+
