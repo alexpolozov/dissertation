@@ -14,13 +14,11 @@ examples.
 Each program $P$ in the FlashFill DSL $\ffdsl$ takes as input a tuple of \emph{user input strings} $v_1, \dots, v_k$,
 and returns an output string.
 
-The FlashFill language $\ffdsl$ is structured in three layers.
-On the topmost layer (omitted in \Cref{fig:dsl:flashfill}), an $n$-ary
-\textsf{Switch} operator evaluates $n$ predicates over the input string tuple, and chooses the branch that then produces
-the output string.
-\todoinline{Put \textsf{Switch} in the figure}
 \todoinline{Mark all \textbf{(a)}, \textbf{(b)}, \dots\ as subfigures with hyperlinks.}
-Each \textsf{Switch} branch is a \emph{concatenation} of some number of \emph{atomic string expressions}, which
+The FlashFill language $\ffdsl$ is structured in three layers.
+On the topmost layer, an $n$-ary \textsf{ITE} (``if-then-else'') operator evaluates $n$ predicates over the input string
+tuple, and chooses the branch that then produces the output string.
+Each \textsf{ITE} branch is a \emph{concatenation} of some number of \emph{atomic string expressions}, which
 produce pieces of the output string.
 Each such atomic expression can either be a \emph{constant}, or a \emph{substring} of one of the input strings $v_1,
 \dots, v_k$.
@@ -38,10 +36,13 @@ The \emph{position expression} logic for choosing starting and ending positions 
         \begin{lstlisting}[language=dsl,gobble=12,morekeywords={Regex}]
             language FlashFill;
             // Nonterminals
-            @start string $transform$[string[] $inputs$] $\coloneq$ $atom$ | Concat($atom$, $transform$[$inputs$]);
+            @start bool $expr$[string[] $inputs$] $\coloneq$
+                let string $\ell$ = std.Kth($inputs$, $k$) in std.ITE($match$[$\ell$], $transform$, $expr$[$inputs$]);
+            string $transform$ $\coloneq$ $atom$ | Concat($atom$, $transform$);
             string $atom$ $\coloneq$ ConstStr($s$) | let string $x$ = std.Kth($inputs$, $k$) in Substring($x$, $pp[x]$);
             Tuple<int, int> $pp$[string $x$] $\coloneq$ std.Pair($pos[x]$, $pos[x]$);
             int $pos$[string $x$] $\coloneq$ AbsPos($x$, $k$) | RegexPos($x$, std.Pair($r$, $r$), $k$);
+            bool $match$[string $\ell$] $\coloneq$ Contains($\ell$, $r$) | StartsWith($\ell$, $r$) | EndsWith($\ell$, $r$);
             // Terminals
             string $s$;  $\qquad$   int $k$;  $\qquad$  Regex r;
         \end{lstlisting}
@@ -96,9 +97,8 @@ The \emph{position expression} logic for choosing starting and ending positions 
             int[] $regexPositions$ $\coloneq$ RegexMatches($doc$, std.Pair($r$, $r$));
             int $pos$[string $x$] $\coloneq$ FF.$pos$[$x$];  // External nonterminal
             StringRegion[] $lines$ $\coloneq$ std.FilterInt($init$, $step$, $filterLines$);
-            StringRegion[] $filterLines$ $\coloneq$ std.Filter($\kwlambda\, \ell \!\kwfun\, match$, $docLines$);
+            StringRegion[] $filterLines$ $\coloneq$ std.Filter($\kwlambda\, \ell \!\kwfun\ $FF.$match$[$\ell$], $docLines$); // External nonterminal
             StringRegion[] $docLines$ $\coloneq$ SplitLines($doc$);
-            bool $match$ $\coloneq$ Contains($\ell$, $r$) | StartsWith($\ell$, $r$) | EndsWith($\ell$, $r$);
             // Terminals
             int $init$;   $\qquad$  int $step$;  $\qquad$  Regex $r$;
         \end{lstlisting}
@@ -107,11 +107,12 @@ The \emph{position expression} logic for choosing starting and ending positions 
             a set of possible values for the terminal~$r$.
             \textbf{(c)}
             FlashExtract DSL $\fedsl$ for selection of spans in a textual document $doc$.
-        It references position extraction logic $pos$ from $\ffdsl$. }
+        It references position extraction logic $pos$ and Boolean predicates $match$ from $\ffdsl$. }
         \label{fig:dsl:flashfill}
     \end{fullpage}
 \end{figure}
 
+\def\wspace{\text{\color{Brown}\textvisiblespace}}
 \begin{example}[{Adapted from \cite[Example 10]{flashfill}}]
     \label{ex:background:ff}
     Consider the problem of formatting phone numbers in a list of conference attendees:
@@ -128,13 +129,11 @@ The \emph{position expression} logic for choosing starting and ending positions 
         \end{tabular}
     \end{center}
     One possible FlashFill program that performs this task is shown below:
-    \begin{multline*}
-        \mathsf{ConstStr}(\stringliteral{(}) \concat \mathsf{Match}(v_1, \stringliteral{\textbackslash d+}, 1) \concat
-        \mathsf{ConstStr}(\stringliteral{)\textvisiblespace}) \concat \\
-        \mathsf{Match}(v_1, \stringliteral{\textbackslash d+}, 2) \concat
-        \mathsf{ConstStr}(\stringliteral{-}) \concat \mathsf{Match}(v_1, \stringliteral{\textbackslash d+}, 3)
-    \end{multline*}
-    where $\mathsf{Match}(w, r, k)$ in $\ffdsl$ is a $k^{\text{th}}$ match of a regex $r$ in $w$ ---
+    \begin{lstlisting}[language=dsl]
+        ConstStr('(') $\concat$ Match($v_1$, '\d+', 1) $\concat$ ConstStr(')$\wspace$') $\concat$
+            Match($v_1$, '\d+', 2) $\concat$ ConstStr('-') $\concat$ Match($v_1$, '\d+', 3)
+    \end{lstlisting}
+    where \dslinline|Match($w$, $r$, $k$)| in $\ffdsl$ is a $k^{\text{th}}$ match of a regex $r$ in $w$ ---
     an abbreviation for
     ``\dslinline|let $x = w$ in Substring($x$, $\langle$RegexPos($x$, $\langle\varepsilon,\, r\rangle$, $k$), RegexPos($x$, $\langle r,\, \varepsilon\rangle$, $k$)$\rangle$)|''.
     Here we also use the notation $\langle x, y \rangle$ for ``\dslinline|std.Pair($x$, $y$)|'' and $f_1 \concat \dots \concat
@@ -155,27 +154,29 @@ of spans in that document.
 The sequence is selected based on combinations of \texttt{Map} and \texttt{Filter} operators, applied to sequences of
 matches of various regexes in $doc$.
 
-\begin{figure}[t]
+\begin{sidewaysfigure}[p!]
     \centering
+    \uwsinglespace
     \begin{tcbraster}[beamer, raster columns=1, size=minimal]
-        \tcbincludegraphics{figures/flashextract-scenario}
+        \tcbincludegraphics{figures/Playground}
     \end{tcbraster}
-    \caption{An illustrative scenario for data extraction from semi-structured text using FlashExtract~\cite[Figure
-    1]{flashextract}.}
+    \caption{An illustrative scenario for data extraction from semi-structured text using FlashExtract.}
     \label{fig:example:flashextract}
-    \vspace{-\baselineskip}
-\end{figure}
+\end{sidewaysfigure}
 
-\begin{example}[{Adapted from \cite[Examples 1 and 4]{flashextract}}]
+\begin{example}
     \label{ex:background:fe}
     Consider the textual file shown in \Cref{fig:example:flashextract}.
-    One possible $\fedsl$ program that extracts a sequence of yellow regions from it is
-    \begin{lstlisting}[language=dsl]
-        LinesMap($\fun{x}$ $\langle$AbsPos($x$, 0), AbsPos($x$, -1)$\rangle$,
-            Filter($\fun{\ell}$ EndsWith($\ell$, '\d+"'), SplitLines($doc$)))
+    One possible $\fedsl$ program that extracts a sequence of yellow regions (the scores) from it is
+    \begin{lstlisting}[language=dsl, gobble=8]
+        LinesMap($\fun{x}$ $\langle$RegexPos($x$, $\langle$'\|', $\varepsilon\rangle$, -1), RegexPos($x$, $\langle$'\d+', $\varepsilon\rangle$, -1)$\rangle$,
+            FilterInt(1, 3, Filter($\fun{\ell}$
+                StartsWith($\ell$, '"|$\wspace$style="text-align:$\wspace$center;"|$\wspace${$\wspace${$\wspace$Sort|"' $\concat$ Alphanumeric),
+                SplitLines($doc$))))
     \end{lstlisting}
-    It splits $doc$ into a sequence of lines, selects only the lines ending with a number followed by a quote, and on
-    each such line $x$ extracts a span $x[0:-1]$ (i.e. the entire line $x$).
-    \todoinline{Make a better example with Playground}
+    It splits $doc$ into a sequence of lines, selecting only the lines that start with a certain constant string
+    followed by an \texttt{Alphanumeric} token.
+    Then, from every third such line starting from the second one, it extracts the string between the last occurrence of
+    \stringliteral{|} and the last occurrence of a number.
 \end{example}
 
