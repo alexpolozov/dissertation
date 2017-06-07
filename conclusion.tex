@@ -1,2 +1,127 @@
 \chapter{Conclusions and Future Work}
 \label{ch:conclusion}
+
+This work presents a new universal framework for programming by examples (PBE) that is parameterized by a
+rich domain-specific language (DSL) and uses deductive search to efficiently construct a set of programs consistent with
+a given inductive specification.
+In the thesis statement, I set out to show that this proposed methodology generalizes most of the prior approaches to
+PBE.
+In \Cref{ch:background,ch:vsa,ch:prose}, I introduce, explore, and apply this methodology, building a single
+unification to a disparate family of state-of-the-art techniques in the field of PBE.
+Moreover, as \Cref{ch:prose} demonstrates, these technologies after a reimplementation on top of our PROSE framework
+become more maintainable, extensible, and amenable to mass-market deployment.
+The fact that a PBE-based technology can now be implemented on top of one common scaffolding significantly lowers the
+entry barrier to developing a new such technology.
+As a result, PROSE allowed us to create a family of new PBE-based tools in various data wrangling and manipulation
+domains, which by now have been deployed in numerous industrial applications and re-used by external academic
+collaborators.
+
+As we discovered in \Cref{ch:interactive}, after a PBE-based technology is made available as part of a mass-market
+application, the demands of superb user experience give birth to multiple unique research challenges, which do not arise
+as prominently at a smaller scale.
+The main such challenge is disambiguation of user intent.
+While omnipresent at any scale, it is particularly challenging when the underlying DSL is a large real-life data
+wrangling language and the task requires transforming or extracting a gigabyte-sized dataset.
+In such a setting, the user cannot examine the entire dataset or all the outputs of the currently learned candidate
+program.
+As a result, intent disambiguation, previously mostly reactive, has to become proactive.
+At each iteration of an interactive synthesis session the system must seek the user's feedback about the currently
+learned program, suggest additional clarifying examples, and be transparent about its current understanding of the
+intent.
+As our experiments show, such user interaction models significantly improve the user's confidence and trust in the
+system, as well as decrease the number of errors in the completed tasks.
+
+\Cref{ch:interactive} presents our initial exploration of the interactive synthesis space.
+I aim to improve the interaction process in two ways:
+(a) reducing the number of refining iterations (thereby converging toward the right program faster and improving the
+user's confidence in the results), and
+(b) incrementally leveraging the results of past learning iterations to boost the performance of the synthesis engine
+(thereby shortening the entire session).
+I present our domain-agnostic implementation of feedback-based and incremental synthesis on top of the PROSE framework,
+which makes them immediately available to any derived PBE technology.
+The initial results show significant improvements in both the number of synthesis iterations and the learning time of a
+single iteration on a diverse collection of real-life scenarios.
+
+\section{Future Horizons}
+
+The PROSE framework makes a significant step toward democratizing program synthesis and making it a true industrial
+commodity, available to any domain expert without a required background in formal methods.
+However, this step does not yet bring us all the way to this goal.
+Developing a PBE technology on top of PROSE still requires non-trivial insight about both the underlying DSL and the
+synthesis process.
+Specifically,
+\begin{itemize}[nosep]
+    \item the designer must manually explore a large dataset of practical tasks to envision a concise but expressible
+        enough DSL to cover all of them,
+    \item the designer must implement witness functions for any non-standard operators in this DSL (which may be
+        non-trivial for the operators that are not easily invertible),
+    \item the designer must specify a ranking function to disambiguate among the programs in the DSL (which is tedious
+        and typically requires taking into account numerous corner cases), and
+    \item the designer must maintain all three aforementioned components manually, extending them to cover new tasks in
+        the domain, to improve the synthesizer's performance, or to simplify the interaction process.
+\end{itemize}
+To truly democratize program synthesis, we should address these barriers, either via intelligent automation, or via
+computer-aided tooling.
+Below, I identify several specific problems in this space that we are currently investigating.
+
+\paragraph{Learning to rank}
+The most time-consuming part of developing a PROSE-based PBE technology is writing a ranking
+function~\cite{polozov2016program}.
+Its nature (typically fuzzy, hardly interpretable, and full of corner cases) suggests that stochastic techniques such as
+deep learning should be effective at automatically learning a ranking function given a dataset of completed tasks.
+In \citeyear{cav:ranking}, \citet{cav:ranking} successfully demonstrated such a technique on the original implementation
+of FlashFill.
+We are currently incorporating this capability in the core of the PROSE framework.
+
+Ideally, we would like to make the training procedure domain-agnostic and thus potentially applicable to any PROSE-based
+DSL.
+However, this would eliminate a whole class of important features for the ranking functions -- \emph{data-based
+features}.
+Our recent experiments show that an effective ranking function cannot be defined on a program AST alone, it must also
+take into consideration the task spec provided to the synthesis engine (i.e. program inputs and
+outputs)~\cite{learning2rank}.
+Hence, the final architecture will necessarily include both domain-agnostic and domain-specific components, and
+designing it in an accessible way is an open question.
+
+\paragraph{Ranking the search space}
+The witness functions of PROSE implicitly define a search space for the programs that are consistent with a given task
+spec.
+This search space is structured as a highly branching DAG.
+As the branching factor of this DAG grows, so does the duration of the learning process (as we showed in
+\Cref{sec:prose:discussion}).
+Because deductive search must independently explore all the branches to guarantee completeness (i.e. to find a
+conformant program if one exists), such branching becomes a bottleneck in the synthesis process.
+
+While the ranking function on its own does not help to prioritize or eliminate any branches (since it only ranks
+complete programs), the ranking principle may nevertheless help us.
+Recently, \citet{deepcoder} showed that a deep learning system trained with randomly generated DSL programs can learn a
+probability distribution over the DSL operators that improves the performance of an enumerative program synthesizer by
+several orders of magnitude.
+A natural extension of this methodology to deductive synthesis is learning \emph{search tactics}.
+A search tactic is a probability distribution over the branches deduced by a witness function, which helps the system
+prioritize those branches that are more likely to contain a relevant subexpression for the given task spec.
+For example, in real-life FlashFill scenarios it is rare that two logically different subexpressions of a
+\dslinline|Concat| program construct different consecutive parts of the same token in the output string (e.g. a number).
+Thus, a common effective search tactic suggests prioritizing the branches that split the output string only at token
+boundaries.
+Although such tactics are currently specified manually by the DSL designers, they look easily learnable given our
+large compiled dataset of real-life synthesis tasks.
+
+\paragraph{Multi-modal specifications}
+Input-output examples are a natural specification choice for end users, who typically do not know formal logic or even
+programming.
+However, in some cases (e.g. SQL or CSS synthesis) even specifying a full example may be overly cumbersome.
+A better means of specification in those cases is \emph{natural language} -- either via describing the desired program
+completely, or via augmenting other specifications by keyword-based queries.
+Although prior work in program synthesis by natural language has required significant
+engineering~\cite{nlyze}, recent advances in natural language processing (NLP), powered by deep
+learning, should help overcome this barrier~\cite{quirk2015language}.
+
+\paragraph{Mixed-initiative DSL design}
+Designing the right DSL for a PBE-based application remains in some ways an art form.
+On one hand, it must be expressive enough to cover the desired practical tasks, and generalize them enough to not
+overfit to the specific instances considered by the designer.
+On the other hand, it must be concise and modular enough to enable efficient program synthesis via deductive search.
+Currently, PROSE does not offer the designer any help in this process beyond straightforward syntax validation.
+To improve this, we are considering a mixed-initiative tool that would analyze the DSL currently specified by
+the domain expert, and evaluate it w.r.t. the specified design goals (such as the desired task space coverage).
