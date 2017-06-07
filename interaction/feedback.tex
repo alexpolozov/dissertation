@@ -1,2 +1,307 @@
 \section{Feedback-Based Synthesis}
 \label{sec:interactive:feedback}
+
+As we discussed above, an end user often does not have a clear understanding of the full spec, and may suffer
+significant cognitive load with this task.
+At every iteration, the current candidate program set $\vsa_i$ contains thousands of ambiguous programs, and humans
+struggle with reasoning about possible ambiguities in intent specification.
+In contrast, the synthesis system can analyze ambiguities in $\vsa_i$ and derive the most efficient way to resolve them
+by proactively soliciting concrete knowledge from the user.
+This observation introduces a new actor in the traditional learner-user interaction process, which we call \emph{the
+hypothesizer}.
+
+\Cref{fig:feedback:hypothesizer} shows our envisioned workflow.
+Formally, any \emph{constraint type} used in PBE (e.g. example, prefix, output type) states a \emph{property} on a
+subset of the DSL.
+Given a program set $\vsa_i$, the hypothesizer deduces possible properties that best disambiguate among programs in
+$\vsa_i$.
+Any such property is convertible to a Boolean or multiple-choice question $q$, which the hypothesizer asks the user.
+Any response $r$ for $q$ is convertible to a concrete constraint $\constraint$, which begins a new iteration of
+synthesis.
+
+Such \emph{feedback-based} interaction has several major benefits.
+First, it reduces the cognitive load on the user: instead of analyzing the program's behavior, she only answers concrete
+questions.
+Second, it significantly reduces the number of synthesis iterations thanks to the hypothesizer's insight into the
+program set $\vsa$ and its choice of disambiguating questions.
+Finally, feedback and proactiveness increases the user's confidence and trust in the system.
+
+\tikzstyle{flowchart} = [semithick, align=center, >=stealth', every path/.style={->, font=\small}]
+\tikzstyle{actor} = [draw, rounded corners, inner sep=6pt, node distance=2cm, font=\sffamily, outer sep=3pt,
+                     fill=blue!20]
+\tikzstyle{data} = [inner sep=5pt]
+\tikzstyle{empty} = [inner sep=0pt, outer sep=0pt]
+\tikzstyle{pass} = [densely dashed, thin, >=spaced open triangle 45, color=gray]
+\tikzstyle{edgelabel} = [sloped, anchor=center, above]
+
+\begin{figure}[t]
+    \centering
+    \uwsinglespace
+    \begin{tikzpicture}[flowchart]
+        \node [actor] (learner) {Learner};
+        \node [actor, right=3cm of learner] (user) {User};
+        \path (learner) to coordinate[midway] (mid) (user);
+        \node [actor, above=3.0cm of mid] (analyzer) {Hypothesizer};
+        \node [data, left=of learner] (ranking) {Ranking \\ function $h$};
+        \draw (ranking) to (learner);
+        \draw (learner) to ["VSA $\vsa$" {edgelabel, pos=0.33}, bend left=20]
+            node[empty, pos=0.85] (lstart) {}
+            (analyzer);
+        \draw (user) to["spec $\spec$"]
+            node[empty, pos=0.85] (rend) {}
+            (learner);
+        \node [data, above left=1.2cm and 1.0cm of learner] (dsl) {DSL $\dsl$};
+        \draw (dsl) to
+            node[empty, midway] (lend) {}
+            (learner);
+        \draw (analyzer.south east) to["question $q$" edgelabel, bend left=10] (user);
+        \draw (user) to["response $r$" {edgelabel, below, pos=0.37}, bend left=10]
+            node[empty, pos=0.88] (rstart) {}
+            ($(analyzer.south east) - (0.4,0)$);
+        \draw[pass] (rstart) to["refined spec $\spec'$"' edgelabel, bend right=20] (rend);
+        \draw[pass] (lstart) to["refined DSL $\dsl'$"' edgelabel, bend right=30] (lend);
+    \end{tikzpicture}
+    \caption{Learner-user communication in interactive PBE.}
+    \label{fig:feedback:hypothesizer}
+\end{figure}
+
+
+\paragraph{Correctness-burden balance}
+The crucial part of the hypothesizer's job is evaluation of disambiguation effectiveness of every potential question.
+Our prototype implementation of \ConversationalClarification in \FlashProg always requested its clarification on the
+first available discrepancy.
+However, this is neither the fastest nor the most user-friendly experience:
+\begin{itemize}
+    \item On one hand, a system might ask for an additional example every time there exists an alternative candidate
+        program that disagrees with the current most likely candidate on some row.
+        In this case, the learning session is guaranteed to converge to the desired program if one exists, typically
+        within 10-20 iterations.
+
+        Despite the attractive guarantee, this approach is undesirable because a good ranking function often picks the
+        intended program after 1-5 examples.
+        In such a case, all subsequent iterations only eliminate implausible candidates without actually changing the
+        result.
+        The user spends a lot of cognitive effort answering superfluous questions.
+
+    \item On another hand, the system might stop asking disambiguating questions too early.
+        In this case, the learned program may be incorrect but the user will only notice it if she discovers a
+        discrepancy manually.
+\end{itemize}
+In machine learning terminology, a superfluous disambiguating question is a \emph{false positive} (it is generated but
+not strictly required to learn the correct program), and a missing disambiguating question is a \emph{false negative}
+(it is required but not generated).
+Our \FlashProg study~\cite{flashprog} included only the most conservative disambiguating algorithm, which always
+converged to zero ambiguities.
+As a result, it always generated false positive questions.
+
+To minimize false positives, a disambiguating algorithm must intelligently pick the discrepancies presented to the user.
+Well-chosen discrepancies will eliminate implausible candidate programs from consideration faster.
+To minimize false negatives, the algorithm must intelligently estimate the likelihood of the currently chosen candidate
+program.
+A good estimation should ensure that any correct (or at least plausible) program is ranked higher than all incorrect
+(implausible) programs.
+
+\subsection{Problem Definition}
+Let $\dsl$ be a DSL.
+Let $\Psi$ be a set of top-level \emph{constraint types} supported by the synthesizer and witness functions for $\dsl$.
+For each constraint type $\constraint \in \Psi$ we associate a \emph{descriptive question} $q$ such that a
+response $r$ for this question directly constitutes an instance of~$\constraint$.
+We denote such a constraint as $\Psi(r)$.
+Questions $q$ can be Boolean (usually in ternary logic) or multiple-choice.
+We denote the set of possible responses for $q$ as $R(q)$.
+
+\begin{example}
+    An \emph{example constraint} ``output $= v$'' corresponds to a multiple-choice question ``Is the desired output on
+    an input $\state$ equal to $v_1, v_2, \dots, \text{ or } v_k$?''
+    A response to this question constitutes an example constraint ``output $= v_i$'' for the chosen $i$.
+
+    A \emph{datatype constraint} ``$\text{output}\colon \tau$'' corresponds to a Boolean question ``Is the desired
+    program a computation of type $\tau$?
+    Yes (always), no (never), or unknown (maybe).''
+
+    Questions, like constraints, can be domain-specific.
+    In FlashFill, a \emph{relevance constraint} states ``an input $v_i$ must/must not appear in the program.''
+    It corresponds to a Boolean question ``Should the input $v_i$ be used?
+    Yes (always), no (never), or unknown (maybe).''
+\end{example}
+
+\begin{figure}[t]
+    \centering
+    \uwsinglespace
+    \begin{algorithmic}[1]
+        \NoNumber \Procedure{Disambiguate}{Candidate programs $\vsa$, current spec $\spec$}
+        \addtocounter{ALG@line}{-1} \WithNumber
+        \State Analyze the ambiguities in $\vsa$ w.r.t.
+$\spec$.
+        \Statex Let $Q$ be a set of questions that may resolve ambiguity in $\vsa$
+        \Statex \Comment{Compare the disambiguation scores of all questions}
+        \State $q^{*} \gets \argmax\limits_{q \in Q} \mathsf{ds}(q, \vsa, \spec) $
+        \If{$\mathsf{ds}(q^{*}, \vsa, \spec) < \text{threshold } T$}
+        \State \textbf{break}
+        \Else
+        \State Present the question $q^{*}$ to the user
+        \State Let $r$ be the user's response to $q$
+        \State Let $\constraint$ be the response $r$ converted into a constraint
+        \State \Return $\constraint$ to the learner and invoke a new round of synthesis
+        \EndIf
+        \EndProcedure
+    \end{algorithmic}
+    \vspace{\baselineskip}
+    \caption{The hypothesizer's proactive disambiguation algorithm.}
+    \label{fig:feedback:algorithm}
+\end{figure}
+
+\Cref{fig:feedback:algorithm} shows the disambiguation algorithm of the hypothesizer.
+Given a VSA $\vsa$ of current candidate programs and the current iteration's spec $\spec$, the job of the hypothesizer
+is to analyze~$\vsa$ and pick the best question to resolve ambiguities in~$\vsa$.
+If~$\vsa$ has no ambiguities, or if the hypothesizer is not confident in the effectiveness of potential questions, it
+considers the current candidate program $P^{*} = \mathsf{Top}_h \left(\vsa, 1\right)$ correct and does not ask any
+questions.
+
+\subsection{Disambiguation Score}
+
+To evaluate a question's effectiveness, the hypothesizer is parameterized with a \emph{disambiguation score} function
+$\mathsf{ds}(q, \vsa, \spec)$.
+Higher disambiguation scores correspond to more effective questions $q$ -- that is, constraints generated by answering
+$q$ eliminate more incorrect programs from $\vsa$.
+Since the hypothesizer cannot predict the user's response, $\mathsf{ds}(q, \vsa, \spec)$ must represent \emph{potential
+effectiveness} of $q$ for any possible outcome.
+
+Disambiguation score functions may be domain-specific or general-purpose.
+In our evaluation, we found different functions to perform well for different DSLs.
+In this section, I present two efficient \emph{general-purpose} disambiguation score function.
+One of them is independent of the current iteration's spec $\spec$ but takes into account the ranking scores of
+alternative candidate programs in $\vsa$.
+Another one is independent of any domain-specific details of the DSL (including its ranking function), but may be harder
+to compute.
+
+\paragraph{Ranking-based disambiguation}
+The \emph{ranking-based disambiguation score} function prefers a question that promotes higher-ranked programs:
+\[
+    \mathsf{ds_R}(q , \vsa, \spec) \bydef \min_{r \in R(q)} \max_{P \in \vsa_r} h(P)
+\]
+where $\vsa_r$ is a set projection $\mathsf{Filter}\left(\vsa, \Psi(r)\right)$, and $h$ is a ranking function provided
+with the DSL.
+In other words, $\mathsf{ds_R}(q , \vsa, \spec)$ is higher if every response for the question $q$ leads to a
+higher-ranked alternative program among the candidates that are consistent with it.
+
+This disambiguation score can be efficiently evaluated for many constraint types.
+For instance, calculating $\mathsf{ds_R}(q , \vsa, \spec)$ for \emph{example constraints} amounts to clustering $\vsa$
+and comparing the top-ranked programs across all clusters.
+Alternatively, we can quickly compute a good approximation to $\mathsf{ds_R}(q , \vsa, \spec)$ by randomly sampling $k$
+programs from the VSA and considering only their outputs.
+
+\paragraph{Entropy-based disambiguation}
+The \emph{entropy-based disambiguation score} prefers a question that resolves more uncertainty in the VSA:
+\[
+    \mathsf{ds_E}(q , \vsa) = E \left\{ \vsa_r \,\middle|\, r \in R(q) \right\}
+\]
+where each $\vsa_r$ is a \emph{projection} of $\vsa$ onto the corresponding constraint for the response $r$:
+\[
+    \vsa_r = \mathsf{Filter}\left(\vsa,\, \Psi(r)\right)
+\]
+and $E(\vsa_1, \dots, \vsa_k)$ is the \emph{entropy of sizes} of its parameters:
+\[
+    E(\vsa_1, \dots, \vsa_k) = - \sum_{i=1}^k \frac{|\vsa_i|}{Z} \log \frac{|\vsa_i|}{Z}, \qquad
+    Z = |\vsa_1| + \dots + |\vsa_k|
+\]
+In other words, $\mathsf{ds_E}(q , \vsa)$ is higher if possible responses for $q$ induce a high-entropy partitioning of
+$\vsa$ (i.e., they split $\vsa$ into fairly even partitions).
+
+\begin{example}
+    If $q$ is a question for an \emph{example constraint}, its set of responses $R(q)$ includes all possible outputs
+    $r_1, \dots, r_k$ of the programs currently in $\vsa$.
+    The corresponding constraint $\Psi(r_j)$ for each response is the example constraint ``output $= r_j$''.
+    Thus, the projections $\mathsf{Filter}\left(\vsa, \Psi(r_1)\right), \dots, \mathsf{Filter}\left(\vsa,
+    \Psi(r_k)\right)$ are simply clusters in the partitioning $\clustering$ of $\vsa$ w.r.t. the current input $\state$.
+    Each of the clusters contains only the programs that evaluate to the same output $r_j$.
+
+    Hence, $\mathsf{ds_E}(q , \vsa)$ in this case is equal to the entropy of the clustering $\clustering$.
+    Given a VSA $\vsa$, the hypothesizer simply computes its clustering on the current input $\state$, computes the
+    entropy of this clustering, and uses it to decide the potential effectiveness of asking a multiple-choice
+    disambiguation question.
+
+    For example, consider a VSA of 10 programs that produce 2 different outputs.
+    $R(q)$ then has two options, one for each possible output.
+    If the cluster sizes corresponding to these outputs are $\{5; 5\}$, then the entropy of this clustering is high, and
+    any response to $q$ will eliminate a significant fraction of the candidate programs.
+    In contrast, if the cluster sizes are $\{9; 1\}$, then the entropy of this clustering is low, and a response may or
+    may not be efficient in eliminating incorrect programs.
+\end{example}
+
+\begin{example}
+    For a ternary Boolean question $q$ (e.g., a datatype question) the response set $R(q) = \left\{\text{``yes''},
+        \text{``no''}, \text{``unknown''}\right\}$.
+    The first two responses split $\vsa$ into two disjoint partitions.
+    The third response does not provide any new information, so its corresponding projection is the entire $\vsa$, which
+    contributes 0 to the entropy summation.
+    Therefore, $\mathsf{ds_E}(q , \vsa)$ is equal to the entropy of the two-way split of $\vsa$ into programs satisfying
+    $q$ and all others.
+\end{example}
+
+As compared to ranking-based disambiguation score, the entropy-based score is independent of a ranking function and
+therefore DSL-agnostic.
+However, it also has its drawbacks, such as reliance on the clustering operation $\clustering$, which may be expensive
+for large VSAs.
+% We evaluate the effectiveness of both disambiguation scores in \Cref{sec:evaluation}.
+
+\subsection{Evaluation}
+
+We use the PROSE-based implementation of FlashFill to evaluate feedback-based synthesis on a set of 457 text
+transformation tasks.
+It uses \emph{example} constraint questions.
+In order to efficiently generate these questions, we sample $2000$ programs from the VSA and cluster on those, assigning
+the disambiguation score $\mathsf{ds_R}$ as described above.
+We chose $2000$ to achieve a good balance between performance and having a high probability of including
+at least one program from every large cluster.
+
+In the \emph{baseline setting}, the user provides the earliest incorrect row as the next example at each iteration.
+In the \emph{feedback-driven setting}, the system instead proactively asks the user disambiguating questions on selected
+input rows until the disambiguation score falls below the threshold $T$.
+We set $T = 0.47$ as the mean of the score distribution over our tasks.
+
+We evaluate FlashFill's feedback on two dimensions: \emph{cognitive burden} and \emph{correctness}.
+Cognitive burden is defined as the number of rows the user has to \emph{read and verify} in the process.
+In the baseline setting, it is the number of examples $+$ the number of correct rows before the first discrepancy that
+are verified at each iteration.
+In the feedback-driven setting, it is the number of questions answered.
+
+Correctness is a combination of \emph{false positives} and \emph{false negatives}.
+False positive questions occur when FlashFill keeps asking questions after the program is already correct.
+False negative questions occur when FlashFill stops before it finds a correct program.
+
+In correctness evaluation, only 2/457 tasks completed incorrectly (i.e., with false negatives).
+The majority of tasks (342/457) finish with the same number of examples, and the number of false positives in the rest
+never exceeds 4 (specifically, 90 tasks with 1 false positive, 22 with 2, and 1 task with 4 false positives).
+
+\begin{table}[t]
+    \centering
+    \begin{tabular}{llllll}
+        \toprule
+        & \multicolumn{5}{c}{\textbf{Feedback-driven}} \\
+        \cmidrule{2-6}
+        \textbf{Baseline} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} \\
+        \midrule
+        \textbf{1} & 241 & 50 & 16 &   & 1 \\
+        \textbf{2} & 75 & 30 & 4 &   &   \\
+        \textbf{3} & 20 & 7 & 2 &   &   \\
+        \textbf{4} &   & 5 & 3 &   &   \\
+        \textbf{5} &   & 1 &   &   &   \\
+        \textbf{6} & 1 & 1 &   &   &   \\
+        \bottomrule
+    \end{tabular}
+    \caption{Number of rows inspected in the baseline and the feedback-driven settings for the evaluation of
+        a feedback-driven FlashFill interaction with a ranking-based disambiguation score.
+        The data is presented as a histogram: for example, there were \textbf{20/457} scenarios such that the baseline
+        setting required \textbf{3} iterations to complete the task, and the feedback-based setting required \textbf{1}
+        iteration.
+        Empty cells represent the value of $0$.}
+    \label{tbl:feedback:ff:iterations}
+\end{table}
+
+\Cref{tbl:feedback:ff:iterations} compares the cognitive burden of both settings.
+It shows the histogram distribution of our tasks for each pair of verified row counts in baseline and feedback-driven
+settings.
+The baseline setting often requires the user to inspect more rows (that is, the numbers \emph{below} the diagonal in
+\Cref{tbl:feedback:ff:iterations} are larger than the numbers above it).
+\todoinline{Evaluation of the entropy-based disambiguation.}

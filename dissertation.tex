@@ -38,7 +38,8 @@
 \usepackage{pgfplots}
 \usepackage{tikzscale}
 \usetikzlibrary{shadings, shapes, arrows, tikzmark, decorations.pathreplacing,
-                fit, positioning, arrows.meta, calc, backgrounds}
+                fit, positioning, arrows.spaced, arrows.meta, calc, backgrounds,
+                quotes}
 \tcbuselibrary{raster, skins}
 \tcbset{sharp corners=all, boxrule=0.1mm, colback=black!3!white}
 \tikzset{
@@ -162,6 +163,10 @@
 %%% MATH OPERATORS
 \DeclareMathOperator*{\bigvsaunion}{\adjustbox{scale=1.6, valign=m, raise=-2pt}{$\bm{\mathsf{\cup}}$}}
 \DeclareMathOperator*{\codomain}{\textbf{codom}}
+\DeclareMathOperator*{\Argmin}{Arg\!\min}
+\DeclareMathOperator*{\Argmax}{Arg\!\max}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                     BEGIN DOCUMENT                         %%%

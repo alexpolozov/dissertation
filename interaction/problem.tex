@@ -29,14 +29,11 @@ associated techniques.
         \item $(P \models \spec_j) \Rightarrow (P \models \spec_i)$ for any $0 \le i < j \le m$ s.t. $N_i = N_j$.
     \end{enumerate}
     We say that the process is \textbf{converging} iff the top-ranked program of the last program set in the process
-    satisfies the task spec:
-    \[
-        P^{*} = \mathsf{Top}_h\left(\vsa_m, 1\right) \models \spec^{*}
-    \]
+    satisfies the task spec: $P^{*} = \mathsf{Top}_h\left(\vsa_m, 1\right) \models \spec^{*}$,
     and the process is \textbf{failing} iff the last program set is empty: $\vsa_m = \emptyset$.
 
-    An \textbf{interactive synthesis algorithm} $\widehat{\synalgorithm}$ is a procedure (parameterized by $\dsl$, $\synalgorithm$, and $h$)
-    that solves the following problem:
+    An \textbf{interactive synthesis algorithm} $\widehat{\synalgorithm}$ is a procedure (parameterized by $\dsl$,
+    $\synalgorithm$, and $h$) that solves the following problem:
     \[
         \mathsf{LearnIter}\colon \left\{
         \begin{aligned}
@@ -45,8 +42,8 @@ associated techniques.
         \end{aligned}
         \right.
     \]
-    In other words, at each iteration $i$ the algorithm receives the $i^{\text{th}}$ learning task $\langle N_i, \spec_i\rangle$ and its own
-    interaction state $\Sigma_{i-1}$ from the previous iteration.
+    In other words, at each iteration $i$ the algorithm receives the $i^{\text{th}}$ learning task $\langle N_i,
+    \spec_i\rangle$ and its own interaction state $\Sigma_{i-1}$ from the previous iteration.
     The type and content of $\Sigma_i$ is unspecified and can be implemented by $\widehat{\synalgorithm}$ arbitrarily.
     \label{problem:interactive}
 \end{problem}
@@ -63,8 +60,8 @@ associated techniques.
 
 The notion of an interactive synthesis process formally models a typical learner-user interaction where $\spec^{*}$
 describes the desired program.
-The task spec is not know to the synthesizer -- it is an ``ideal spec'' that would unambiguously specify the user
-intent.
+The task spec $\spec^{*}$ is not known to the synthesizer -- it is an ``ideal spec'' that would unambiguously specify
+the user intent.
 The general nature of definitions in \Cref{problem:interactive} allows many different implementations for
 $\widehat{\synalgorithm}$.
 In addition to completeness, different implementations (and choices for the state $\Sigma$) strive to satisfy different
@@ -74,5 +71,5 @@ In addition to completeness, different implementations (and choices for the stat
     \item The total amount of information communicated by the user,
     \item Cumulative execution time of all $m+1$ learning calls.
 \end{itemize}
-In the rest of this chapter, I present several specific instantiations of interactive synthesis algorithms that
-optimize these objectives.
+In the rest of this chapter, I present several specific instantiations of interactive synthesis algorithms that optimize
+these objectives.
