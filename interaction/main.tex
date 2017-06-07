@@ -1,2 +1,91 @@
 \chapter{Interactive Program Synthesis}
 \label{ch:interactive}
+
+The key challenge of PBE and, more generally, programming with under-specifications, is \emph{intent ambiguity}.
+Examples are an inherently ambiguous form of specification.
+A typical industrial DSL usually may contain up to $10^{20}$ programs that are consistent with a given input-output
+example~\cite{singh2012synthesizing}.
+The underlying PBE system might end up synthesizing an unintended program that is consistent with the examples provided
+by the user but does not generate the intended results on some other inputs that the user cares about.
+In \citeyear{pbd-fail}, \citeauthor{pbd-fail} presented a critical discussion of PBE systems noting that adoption
+of PBE systems is not yet widespread, and proposing that this is mainly due to lack of usability
+and confidence in such systems~\cite{pbd-fail}.
+We have observed the issues of confidence, transparency, and debuggability to arise in most interactions with PBE-based
+synthesis systems.
+
+In the past, intent ambiguity in PBE has been primarily handled by imposing a sophisticated ranking on the
+DSL~\cite{cav:ranking}.
+While ranking goes a long way in avoiding undesirable interpretations of the user's intent, it is not a complete
+solution.
+For example, FlashFill is designed to cater to users that care not about the program but about its behavior on the small
+number of input rows in the spreadsheet.
+Such users can simply eye-ball the outputs of the synthesized program and provide another example if they are incorrect.
+However, this becomes much more cumbersome (or impossible) with a larger spreadsheet.%
+\footnote{John Walkenbach, famous for his Excel textbooks, labeled \ff as a ``controversial'' feature.
+    He wrote: \textit{``It's a great concept, but it can also lead to lots of bad data. I think many users will look at
+        a few ``flash filled'' cells, and just assume that it worked. But my preliminary tests leads me to this
+        conclusion: Be very careful.''}~\cite{walkenbach:controversial}}
+Moreover, inspecting the synthesized program directly also does not establish enough confidence in it even if the user
+knows programming.
+Two main reasons for this are (i) program readability,%
+\footnote{Stephen Owen, a certified MVP (``Most Valued Professional'')
+  in Microsoft technologies, said the following of a program
+  synthesized by \fe: \textit{``If you can understand this, you’re a better person than I am.''}~\cite{mvp:complaint}}
+and (ii) the users' uncertainty in the desired intent due to hypothetical unseen corner cases in the data.
+
+Due to ambiguity of intent in PBE, the standard user interaction model in this setting is for the user to provide
+constraints \emph{iteratively} until the user is satisfied with the synthesized program or its behavior on the known
+inputs.
+However, most work in this area, including FlashFill and FlashExtract, has not been formally modeled as an iterative
+process.
+In this work, I describe our interactive formulation of program synthesis that leverages the inherent iterative nature
+of synthesis from under-specifications, as well as multiple novel techniques for intent disambiguation and user
+interaction models that leverage the innate strengths of this interactive formulation.
+
+In \Cref{sec:interactive:problem}, I formally introduce the problem of \emph{interactive program synthesis}, wherein an
+application-specific \emph{synthesis session state} is kept after each iteration.
+This state is used to improve the transparency, performance, and debuggability of the synthesis process via various
+means, including proactive feedback to the user, directing the user toward better examples, and speeding up the next
+synthesis iterations incrementally.
+
+In \Cref{sec:interactive:models}, I describe our exploration and evaluation of user interaction models that aim to
+improve the transparency of the iterative synthesis process.
+Our proposed two novel interaction models alleviate above\hyp{}mentioned transparency concerns
+by exposing more information to the user in a form that can be easily understood and acted upon.
+These models help resolve ambiguity in the example\hyp{}based specification, thereby increasing
+user's trust in the results produced by the PBE engine.
+The first model, \emph{Program Navigation}, allows the user to navigate
+between all programs synthesized by the underlying PBE engine (as opposed to displaying only the
+top-ranked program) and to pick one that is intended.
+We leverage the implicit sharing present in a VSA~(\Cref{ch:vsa}) to create a navigational interface that allows the
+user to select from different ranked choices for various parts of the top-ranked program.
+Furthermore, these programs are paraphrased in English for easy readability.
+The second model, \emph{Conversational Clarification}, is based on active learning.
+In it, the system asks questions to the user to resolve ambiguities in the user's
+specification with respect to the available test data.
+These questions are generated after the PBE engine has synthesized multiple programs that are consistent with the
+user-provided examples.
+The system executes these multiple programs on the test data to identify any discrepancies in the execution and uses
+that as the basis for asking questions to the user.
+The user responses are used to refine the initial example-based specification and the
+process of program synthesis is repeated.
+
+\Cref{sec:interactive:feedback} builds on the ideas of Conversational Clarification, generalizing it into a universal
+formal technique that is applicable to an arbitrary interactive synthesis process -- \emph{feedback-based synthesis}.
+It builds on our interactive problem definition from \Cref{sec:interactive:problem}.
+I present a method for leading the user toward the examples with maximum disambiguation potential, and discuss our
+usage of feedback-based synthesis in PROSE-based applications.
+
+Finally, in \Cref{sec:interactive:incremental}, I show how the same problem formulation can be used to improve the
+performance of the synthesis process.
+The standard PBE model requires the user to refine her intent in iterative rounds by providing additional constraints on
+the current candidate program.
+The standard approach has been to re-run the synthesizer afresh with the conjunction of the original constraints and the
+new constraints.
+In this work, I introduce an alternative technique: leveraging the \emph{interpretation of previously learned VSA as a
+sub-language~(\Cref{sec:vsa:language})} to carry out the new round of synthesis on a smaller program space.
+
+\input{problem}
+\input{models}
+\input{feedback}
+\input{incremental}

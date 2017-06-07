@@ -1,0 +1,78 @@
+\section{Problem Definition}
+\label{sec:interactive:problem}
+
+In this section, I extend the conventional program synthesis problem definition~(\Cref{problem:syn:general}) to
+incorporate learner-user interaction.
+It allows us to model the inherent interactive workflow in a first-class manner in the program synthesis formalism and
+associated techniques.
+
+\begin{problem}[Interactive Program Synthesis]
+    Let $\dsl$ be a DSL, and $N$ be a symbol in $\dsl$.
+    Let $\synalgorithm$ be an \emph{inductive synthesis algorithm} for $\dsl$, which solves problems of type
+    $\mathsf{Learn}\left(N, \spec\right)$ where $\spec$ is an \emph{inductive spec} on a program rooted at $N$.
+    The specs $\spec$ are chosen from a fixed class of \emph{supported spec types} $\Phi$.
+    The result of $\mathsf{Learn}\left(N, \spec\right)$ is some set $\vsa$ of programs rooted at $N$ that are consistent
+    with $\spec$.
+
+    Let $\spec^{*}$ be a spec on the output symbol of $\dsl$, called a \emph{task spec}.
+    A~\textbf{$\bm{\spec^{*}}$-driven interactive program synthesis process} is a finite series of 4-tuples
+    $\langle N_0, \spec_0, \vsa_0, \Sigma_0\rangle, \dots, \langle N_m, \spec_m, \vsa_m, \Sigma_m\rangle$, where
+    \begin{itemize}[nosep]
+        \item Each $N_i$ is a nonterminal in $\dsl$,
+        \item Each $\spec_i$ is a spec on $N_i$,
+        \item Each $\vsa_i$ is some set of programs rooted at $N_i$ s.t. $\vsa_i \models \spec_i$,
+        \item Each $\Sigma_i$ is an \textbf{interaction state}, explained below,
+    \end{itemize}
+    which satisfies the following axioms for any program $P \in \dsl$:
+    \begin{enumerate}[nosep, label=\textbf{\Alph*.}]
+        \item $(P \models \spec^{*}) \Rightarrow (P \models \spec_i)$ for any $0 \le i \le m$;
+        \item $(P \models \spec_j) \Rightarrow (P \models \spec_i)$ for any $0 \le i < j \le m$ s.t. $N_i = N_j$.
+    \end{enumerate}
+    We say that the process is \textbf{converging} iff the top-ranked program of the last program set in the process
+    satisfies the task spec:
+    \[
+        P^{*} = \mathsf{Top}_h\left(\vsa_m, 1\right) \models \spec^{*}
+    \]
+    and the process is \textbf{failing} iff the last program set is empty: $\vsa_m = \emptyset$.
+
+    An \textbf{interactive synthesis algorithm} $\widehat{\synalgorithm}$ is a procedure (parameterized by $\dsl$, $\synalgorithm$, and $h$)
+    that solves the following problem:
+    \[
+        \mathsf{LearnIter}\colon \left\{
+        \begin{aligned}
+            \langle N_0, \spec_0, \bot\rangle &\mapsto \langle \vsa_0, \Sigma_0\rangle \\
+            \langle N_i, \spec_i, \Sigma_{i-1} \rangle &\mapsto \langle \vsa_i, \Sigma_i\rangle, \quad i > 0
+        \end{aligned}
+        \right.
+    \]
+    In other words, at each iteration $i$ the algorithm receives the $i^{\text{th}}$ learning task $\langle N_i, \spec_i\rangle$ and its own
+    interaction state $\Sigma_{i-1}$ from the previous iteration.
+    The type and content of $\Sigma_i$ is unspecified and can be implemented by $\widehat{\synalgorithm}$ arbitrarily.
+    \label{problem:interactive}
+\end{problem}
+
+\begin{defn}
+    An interactive synthesis algorithm $\widehat{\synalgorithm}$ is \emph{complete} iff for any task spec $\spec^{*}$:
+    \begin{itemize}[nosep]
+        \item If $\exists P \in \dsl$ such that $P \models \spec^{*}$ then $\widehat{\synalgorithm}$ eventually
+            converges for any $\spec^{*}$-driven interactive synthesis process.
+        \item Otherwise, $\widehat{\synalgorithm}$ eventually fails for any $\spec^{*}$-driven interactive synthesis
+            process.
+    \end{itemize}
+\end{defn}
+
+The notion of an interactive synthesis process formally models a typical learner-user interaction where $\spec^{*}$
+describes the desired program.
+The task spec is not know to the synthesizer -- it is an ``ideal spec'' that would unambiguously specify the user
+intent.
+The general nature of definitions in \Cref{problem:interactive} allows many different implementations for
+$\widehat{\synalgorithm}$.
+In addition to completeness, different implementations (and choices for the state $\Sigma$) strive to satisfy different
+\emph{performance objectives}, such as:
+\begin{itemize}[nosep]
+    \item Number of interaction rounds (e.g. examples) $m$,
+    \item The total amount of information communicated by the user,
+    \item Cumulative execution time of all $m+1$ learning calls.
+\end{itemize}
+In the rest of this chapter, I present several specific instantiations of interactive synthesis algorithms that
+optimize these objectives.

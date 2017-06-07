@@ -242,7 +242,7 @@ proportional to $\clustering$.
             \\ \infer
             {\mathsf{Learn}(N, \spec_1) = \vsa \quad \spec_2 = \neg \langle \state, \constraint\rangle}
             {\mathsf{Learn}(N, \spec_1 \wedge \spec_2) = \mathsf{Filter}(\vsa, \spec_2)}
-            \quad \infer
+            \qquad \infer
             {N := F(N_1, \dots, N_k) \\\\ \text{All witness functions in $G(F)$ accept $\spec$}}
             {\mathsf{Learn}(N, \spec) = \text{\textsc{LearnRule}}(G(F), \spec)} \\
         \end{mathpar}
@@ -253,7 +253,7 @@ proportional to $\clustering$.
             \quad\infer
             {N := \text{let } x = e_1 \text{ in } e_2}
             {\omega_{e_2}(\spec \assuming e_1 = v) = \state[x := v] \rightsquigarrow \spec}
-            \quad\infer
+            \qquad\infer
             {N \text{ is a literal }}
             {\mathsf{Learn}(N, \state \rightsquigarrow v) = \left\{v\right\}}
             \\ \infer
