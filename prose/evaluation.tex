@@ -122,19 +122,63 @@ We share some anecdotes of PROSE simplifying synthesizer development below.
     set of programs that output this substring on a given state $\state$.
     Most of the formalism in the paper and code in their implementation is spent on describing and performing operations
     on such a DAG.
-    In PROSE, the same grammar symbol is instead defined through a recursive binary operator: $f := e \,|\,
+    In PROSE, the same grammar symbol is instead defined through a recursive binary operator: $f \coloneq e \,|\,
     \mathsf{Concat}(e, f)$.
     The witness function for $e$ in \textsf{Concat} constructs $\spec'$ as a disjunction of all prefixes of
     the output string in $\spec$.
     The property for $f$ is conditional on $e$ and simply selects the suffix of the output string after the given prefix
     $\semantics{e}{\state}$.
     Since PROSE caches the results of learning calls $\langle f, \spec \rangle$ for same $\spec$s, the tree of
-    recursive $\mathsf{Learn}(f, \spec)$ calls becomes a DAG.
+    recursive $\mathsf{Learn}(f, \spec)$ calls becomes a DAG, as shown in \Cref{fig:prose:evaluation:dag}.
     This is \emph{the same DAG} as in FlashFill -- but with PROSE, it arises implicitly and at no cost.
     Moreover, it becomes obvious now that DAG sharing happens for any foldable operator, e.g. \textsf{ITE}, $\wedge$,
     $\vee$, sequential statements.
-    \todoinline{Illustration of the \texttt{Concat} DAG.}
+    \label{sc:dag}
 \end{scenario}
+
+\begin{figure}
+    \newcommand{\sproblem}[2]{\ensuremath{\langle #1,\, \stringliteral{#2}\rangle}}
+    \newcommand{\sproblemDisj}[3]{\ensuremath{\langle #1,\, \stringliteral{#2} \vee \stringliteral{#3}\rangle}}
+    \centering
+    \begin{tikzpicture}[f/.style={draw, rounded corners, inner sep=7pt, fill=PowderBlue},
+                        e/.style={draw, sharp corners, shape=rectangle, inner sep=7pt, fill=LightGoldenrodYellow,
+                                     minimum width=2.2cm},
+                        concat/.style={},
+                        every path/.style={-Stealth, rounded corners=10pt}]
+        \node[f] (t202) {\sproblem{f}{202}};
+        \node[concat, anchor=west, below=0.5cm of t202.south east] (conc202) {\textsf{Concat}};
+        \draw (t202.west) |- (conc202);
+        \node[f, anchor=west] at ($(conc202.south) + (1cm, -2cm)$) (t02) {\sproblem{f}{02}};
+        \draw (conc202.south) |- (t02);
+        \node[concat, anchor=west, below=0.5cm of t02.south east] (conc02) {\textsf{Concat}};
+        \draw (t02.west) |- (conc02);
+        \node[f, below right=0.5cm of conc02] (t2) {\sproblem{f}{2}};
+        \draw (conc02.south) |- ($(t2.north west)!0.33!(t2.south west)$);
+        \draw ($(conc202.south west)!0.5!(conc202.south)$) |- ($(t2.south west)!0.33!(t2.north west)$);
+
+        \node[e, right=11.5cm of t202] (a202) {\sproblem{e}{202}};
+        \node[e, below=0.25cm of a202] (a20) {\sproblem{e}{20}};
+        \node[e, below=0.25cm of a20] (a2) {\sproblem{e}{2}};
+        \node[e, below=0.25cm of a2] (a02) {\sproblem{e}{02}};
+        \node[e, below=0.25cm of a02] (a0) {\sproblem{e}{0}};
+
+        \draw[dashed] (t202) -> (a202);
+        \node[e, right=4.5cm of conc202] (adisj) {\sproblemDisj{e}{2}{20}};
+        \draw[dashed] (conc202) -> (adisj);
+        \draw[dashed] (adisj) -> (a20);
+        \draw[dashed] (adisj) |- ($(a2.north west)!0.33!(a2.south west)$);
+        \draw[dashed] (t02) -> (a02);
+        \draw[dashed] (conc02) -> (a0);
+        \coordinate (target) at ($(a2.south west)!0.33!(a2.north west)$);
+        \coordinate (cut) at (adisj.east|-target);
+        \draw[dashed] (t2.east) -| (cut) -> (target);
+    \end{tikzpicture}
+    \caption{A DAG of recursive calls that arises during the deductive search process for a recursive binary operator
+        $f \coloneq e \;|\; \mathsf{Concat}(e,\, f)$.
+        As described in \Cref{sc:dag}, it is isomorphic to an explicitly maintained DAG of substring programs in the
+        original FlashFill implementation~\cite{flashfill}.}
+    \label{fig:prose:evaluation:dag}
+\end{figure}
 
 \begin{scenario}
     During reimplementation of FlashFill, a new operator was added to its substring extraction logic: \emph{relative
