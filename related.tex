@@ -54,7 +54,7 @@ The main synthesis algorithms in SyGuS are enumerative search \cite{transit:prot
 Based on the SyGuS-COMP results, they handle different application domains best, although enumerative search is
 generally effective on medium-sized problems in most settings.
 
-\subsection{Deductive synthesis}
+\subsection{Deductive Synthesis}
 The \emph{deductive} approach to program synthesis \cite{manna1980deductive} uses a formal system of deduction rules to
 build a constructive definition of a program in a way that proves the program's validity.
 This approach is efficient because at every point it works upon a partially correct program and never needs to eliminate
@@ -67,7 +67,7 @@ They characterize the behavior of a \emph{single operator} on a \emph{single inp
 historically describe the behavior of \emph{partial programs} on \emph{all inputs}.
 This allows synthesis designers to easily provide domain\hyp{}specific insight for program synthesis in complex DSLs.
 
-\subsection{Type-based synthesis}
+\subsection{Type-Based Synthesis}
 
 Type-based synthesis is another recent area in program synthesis research~\cite{popl16:frankle,polikarpova2016program}.
 It defines a synthesis problem as a problem of \emph{finding a type inhabitant}, and uses the theory of refinement types
@@ -89,12 +89,41 @@ Similarly to constraint solves, applying this approach to data wrangling domains
 axiomatization and development of a domain-specific reasoning engine, which is highly non-trivial for industrial
 applications.
 
+\subsection{Oracle-Guided Inductive Synthesis}
+\citeauthor{ogis} recently developed a novel formalism for inductive synthesis called \emph{oracle-guided inductive
+synthesis} (OGIS)~\cite{ogis}.
+It unifies several commonly used approaches such as counterexample-guided inductive synthesis (CEGIS)~\cite{sketch} and
+distinguishing inputs~\cite{bitvectors}.
+In OGIS, an inductive learning engine is parameterized with a concept class (the set of possible programs), and it
+learns a concept from the class that satisfies a given partial specification by issuing queries to a given oracle.
+The oracle has access to the complete specification, and is parameterized with the types of queries it is able to
+answer.
+Queries and responses range over a finite set of types, including membership queries, witnesses, counterexamples,
+verification queries, and distinguishing inputs.
+They also present a theoretical analysis for the CEGIS learner variants, establishing relations between concept classes
+recognizable by learners under various constraints.
+
+The problem of interactive program synthesis, presented in this work, can be mapped to the OGIS formalism (with the end
+user playing the role of an oracle).
+Hence, any theoretical results established by \citeauthor{ogis} for CEGIS automatically hold for the settings of
+interactive program synthesis where we only issue counterexample queries.
+
+In addition, inspired by our study of mass-market deployment of PBE-based systems, we present further formalism for the
+user's interaction with the synthesis system.
+While the ``learner'' component in the OGIS formalism is limited to a pre-defined class of queries, our formalism adds a
+separate modal ``hypothesizer'' component.
+Its job is to analyze the current set of candidate programs and to ask the questions that best resolve the ambiguity
+between programs in the set.
+The hypothesizer is domain-specific, not learner-specific, and therefore can be refactored out of the learner and
+reused with different synthesis strategies.
+
 \section{Data Wrangling}
 
 Various forms of data cleaning, parsing, and text manipulation have been addressed by the field of data mining.
 Most system for discovering cleaning transformations on the data perform some form of \emph{active learning} by
 combining intelligent search with human assistance.
-Two prominent examples of this idea are Wrangler~\cite{wrangler} (later Trifacta) and DataXFormer~\cite{dataxformer}.
+Two prominent examples of this idea are Wrangler~\cite{wrangler} (later Trifacta\footnote{\url{https://trifacta.com}})
+and DataXFormer~\cite{dataxformer}.
 
 Both Wrangler and DataXFormer apply an algorithm similar to enumerative search in program synthesis to discover
 transformations.
@@ -122,3 +151,26 @@ The confidence scores associated with each table are seeded with the number of e
 recomputed as DataXFormer changes its beliefs about relevance of each table and each data point to the answer.
 
 \section{Active Learning}
+In machine learning, \emph{active learning} is a subfield of semi-supervised learning where the learning algorithm is
+permitted to issue queries to an oracle (usually a human)~\cite{al:settles}.
+As applied to, e.g., classification problems, a typical query asks for a classification label on a new data point.
+The goal is to achieve maximum classification accuracy with a minimum number of queries.
+
+Research in active learning has focused on two important problems: (a) when to issue a query, and (b) how to pick a data
+point for it.
+For instance, in \emph{uncertainty sampling} \cite{lewis} an active learner queries the user on the input about which it
+is least certain of the labeling.
+The particular uncertainty measure varies by model.
+A probabilistic model for learning a binary classifier could query about the input whose posterior probability is
+closest to $0.5$ \cite{lewis}.
+Other probabilistic classifiers use margin sampling \cite{marginSampling} or (like one of our suggested disambiguation
+scores) the more general entropy approach.
+
+This work borrows the ideas of active learning, extends them, and applies them in the domain of program synthesis.
+In our setting, the issued queries do not necessarily ask for the exact output of the desired program on a given input
+(an equivalent of ``label'' in ML), but may also ask for weaker output properties (e.g.
+verify a candidate element of the output sequence).
+In all cases, though, our queries are \emph{actionable}: they are convertible to constraints, which automatically
+trigger a new iteration of synthesis.
+We also develop a novel approach for picking an input for the query based on its \emph{disambiguation score} w.r.t.
+the current set of candidate programs.
