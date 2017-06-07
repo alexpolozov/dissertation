@@ -119,14 +119,33 @@ reused with different synthesis strategies.
 
 \section{Data Wrangling}
 
+Data wrangling is a process of cleaning and transforming raw semi-structured data, converting it into a form amenable to
+analysis.
+Typically data is locked up in text logs, Web pages, manually compiled spreadsheets, PDF reports, unstandardized CSV
+files, or even images (screenshots).
+By various estimates, data scientists spend over 80\% of their time preparing data for analysis and only 20\% gaining
+business insights from it~\cite{kandel2012enterprise}.
+
+Data wrangling is not unique to statisticians.
+Here are some unrelated applications that we have personally observed over the last several years:
+\begin{itemize}[nosep]
+    \item IT admins have to analyze server logs (usually plain text or JSON) to find a cause of failure.
+        That requires extracting a sequence of entries from the log that match complex syntactic patterns.
+    \item Security/forensics specialists similarly analyze server logs, looking for malicious events.
+        However, patterns of malicious events are \emph{semantic}, not \emph{syntactic}, and typically cannot be
+        described by a regular expression.
+    \item Database integrators for large-scale applications (e.g.
+        Bing, Google, Facebook graphs) use Web mining to extract facts and entities to compile their knowledge graphs.
+        It requires analysis of raw HTML/DOM, extracting data based on learned or manually constructed patterns, and
+        cross-validating extracted facts with existing databases or other webpages.
+\end{itemize}
+
 Various forms of data cleaning, parsing, and text manipulation have been addressed by the field of data mining.
 Most system for discovering cleaning transformations on the data perform some form of \emph{active learning} by
 combining intelligent search with human assistance.
 Two prominent examples of this idea are Wrangler~\cite{wrangler} (later Trifacta\footnote{\url{https://trifacta.com}})
 and DataXFormer~\cite{dataxformer}.
-
-Both Wrangler and DataXFormer apply an algorithm similar to enumerative search in program synthesis to discover
-transformations.
+Both of them apply an algorithm similar to enumerative search in program synthesis to discover transformations.
 However, they significantly differ in their (a) search space, and (b) kind of specification from a human.
 
 Wrangler employs a method coined \emph{predictive interaction}, where at each step in the session the system makes a
