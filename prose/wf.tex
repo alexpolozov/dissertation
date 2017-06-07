@@ -44,7 +44,7 @@ technologies.
 \input{wf-list}
 
 \begin{example}
-    \Cref{tbl:wfs:flashfill} shows witness functions for all FlashFill operators from \Cref{fig:dsl:flashfill}:
+    \Cref{tbl:wfs:flashfill} shows the witness functions for all $\ffdsl$ operators from \Cref{fig:dsl:flashfill}:
     \begin{itemize}[nosep]
         \item A \dslinline|Concat($atom$, $transform$)| expression returns $w$ iff $atom$ returns some prefix of $w$.
             In addition, assuming that $atom$ returns $v$, $transform$ mush return the remaining suffix of~$w$ after the
@@ -64,9 +64,61 @@ technologies.
     \label{ex:wf:flashfill}
 \end{example}
 
+\begin{example}
+    \Cref{tbl:wfs:prose} shows the witness functions for various operators from the standard library of PROSE that are
+    used in $\ffdsl$ and $\fedsl$:
+    \begin{itemize}[nosep]
+        \item A \dslinline|Kth($xs$, $k$)| expression returns $w$ (given that $xs$ returns $\values$) iff $k$ is an
+            index of some occurrence of $w$ in $\values$.
+        \item If \dslinline|Pair($p_1$, $p_2$)| returns $\langle v_1, v_2\rangle$, then $p_j$ returns $v_j$.
+            Note that this witness function is imprecise, since it restricts only a single parameter ($p_1$ or $p_2$).
+        \item A \dslinline|Map($F$, $L$)| expression returns a list that starts with a sublist $\vec{\ell}$ as a prefix
+            (given that $L$ returns $\vec{v}$) iff $F$ is any $\lambda$-function that maps the first $|\vec{\ell}|$
+            elements of $\vec{v}$ to the corresponding elements of $\vec{\ell}$.
+            The fact that $L$ returns $\vec{v}$ is usually established thanks to a corresponding domain-specific witness
+            function for $L$ (defined by a DSL designer for a particular instantiation of \texttt{Map}).
+        \item A \dslinline|Filter($P$, $L$)| expression returns a list that contains $\vec{\ell}$ as a sublist iff the
+            result of $L$ also contains $\vec{\ell}$ as a sublist.
+            In addition, assuming that $L$ returns a list $\vec{v}$, $P$ must be any $\lambda$-function that maps all
+            the elements of $\vec{v}$ that are also present in $\vec{\ell}$ to \texttt{true}, and the rest of the
+            elements to \texttt{false}.
+        \item A \dslinline|FilterInt($i$, $k$, $L$)| expression returns a list that contains $\vec{\ell}$ as a sublist
+            iff the result of $L$ also contains $\vec{\ell}$ as a sublist.
+            In addition, assuming that $L$ returns a list $\vec{v}$, the initial value expression $i$ must evaluate to
+            the index of $\ell_1$ in $\vec{v}$, and the step expression $k$ must evaluate to some divisor of the GCD of
+            the gaps between the consecutive occurrences of the elements of $\vec{\ell}$ in $\vec{v}$.
+    \end{itemize}
+\end{example}
+
+\begin{example}
+    As mentioned above, a witness function for the parameter $L$ of \dslinline|Map($F$, $L$)| must be defined
+    specifically for every instantiation of \texttt{Map} in a given DSL.
+    For instance, the FlashExtract DSL $\fedsl$ contains three \texttt{Map} instantiations: \texttt{LinesMap},
+    \texttt{StartSeqMap}, and \texttt{EndSeqMap} (as defined in \Cref{fig:dsl:flashfill}).
+    Their respective witness functions $\omega_L$ for the same \emph{prefix spec} $\state \tospec \mathbf{?} \sqsupseteq
+    \vec{v}$ are shown below:
+
+    \vspace{0.5\baselineskip}
+    \begin{tabu}{l>{\hspace{0.1cm}}X[$l]}
+        \toprule
+        \textbf{Operator} & \textbf{Output spec} \\
+        \midrule
+        \texttt{LinesMap} & \begin{aligned}
+            &\state \tospec \mathbf{?} \sqsupseteq \bigl[ \ell_1, \dots, \ell_{|\vec{v}|} \bigr] \quad\text{ where } \\
+            &\quad \ell_i \text{ is a line of the input document } \state[doc] \text{ that contains the region } v_i
+        \end{aligned} \\
+        \texttt{StartSeqMap} &
+            \state \tospec \mathbf{?} \sqsupseteq \bigl[p_1 \mid \langle p_1, p_2 \rangle \in \vec{v}\bigr] \\
+        \texttt{EndSeqMap} &
+            \state \tospec \mathbf{?} \sqsupseteq \bigl[p_2 \mid \langle p_1, p_2 \rangle \in \vec{v}\bigr] \\
+        \bottomrule
+    \end{tabu}
+\end{example}
+
+\paragraph{}
 Most witness functions are domain-specific w.r.t.  the operator that they characterize.
 However, once formulated in a module for a domain such as substring extraction, they can be reused by any DSL.
-In our example, witness functions for $\mathsf{Pair}$ and $\mathsf{Kth}$ operators in \Cref{tbl:wfs:prose} do not
+In our example, witness functions for most operators in \Cref{tbl:wfs:prose} (namely, all except \texttt{Map}) do not
 depend on the domain of their parameters, and are therefore formulated generically, for any DSL.
 Witness functions in \Cref{tbl:wfs:flashfill} hold only for their respective operators, but they do
 not depend on the rest of the DSL in which these operators are used, provided the operator semantics is conformant with

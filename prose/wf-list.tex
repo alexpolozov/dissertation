@@ -5,33 +5,33 @@
         \small
         \begin{tabu}{lX[-1$l]X[-1$l]X[-1$l]>{\hspace*{1.2em}}X[-3$l]}
             \toprule
-            \textbf{Operator} & \textbf{Parameter} & \textbf{Input spec} & \textbf{Prerequisites} & \textbf{Output
+            \textbf{Operator} & \textbf{Input spec} & \textbf{Parameter} & \textbf{Prerequisites} & \textbf{Output
             spec} \\
             \midrule
-            \dslinline|Concat($atom$,\ $transform$)| & atom & \state \tospec w & &
+            \dslinline|Concat($atom$,\ $transform$)| & \state \tospec w & atom & &
                 \state \tospec \bigvee\limits_{j=1}^{|w|-1} w[0..j] \\
-                \cmidrule{2-5}
-                & transform & \state \tospec w & atom = v & \state \tospec w[|v|..] \\
+                \cmidrule{3-5}
+                & & transform & atom = v & \state \tospec w[|v|..] \\
             \midrule
-            \dslinline|ConstStr($s$)| & s & \state \tospec w & & \state \tospec w \\
+            \dslinline|ConstStr($s$)| & \state \tospec w & s & & \state \tospec w \\
             \midrule
             \dslinline|let\ $x\ $ = $\ \tikzmark{mark:b:Bind}$std.Kth($inputs$,\ $k$)$\tikzmark{mark:e:Bind}$| &
-              binding & \state \tospec w & &
+              \state \tospec w & binding & &
               \state \tospec \bigvee\limits_{\mathclap{j\colon w \text{ occurs in } v_j}}\ v_j \\[3pt]
-              \cmidrule{2-5}
-            \qquad\dslinline|in Substring($x$,\ $pp$)| & pp & \state \tospec w & x = v & \state \tospec
+              \cmidrule{3-5}
+          \qquad\dslinline|in Substring($x$,\ $pp$)| & & pp & x = v & \state \tospec
               \bigvee\limits_{\mathclap{\substack{w \text{ occurs in } v \\ \text{ at position } l\ \ }}}
               \ \langle l, l + |w|\rangle \\
             \midrule
-            \dslinline|AbsPos($x$,\ $k$)| & k & \state \tospec c & x = v & \state \tospec c \vee c - |v| - 1 \\
+            \dslinline|AbsPos($x$,\ $k$)| & \state \tospec c & k & x = v & \state \tospec c \vee c - |v| - 1 \\
             \midrule
-            \dslinline|RegexPos($x$, $\ \tikzmark{mark:b:RR}$std.Pair($r$,\ $r$)$\tikzmark{mark:e:RR}$,\ $k$)| & rr &
-              \state \tospec c & x = v &
+            \dslinline|RegexPos($x$, $\ \tikzmark{mark:b:RR}$std.Pair($r$,\ $r$)$\tikzmark{mark:e:RR}$,\ $k$)| &
+              \state \tospec c & rr & x = v &
               \state \tospec \bigvee\limits_{\mathclap{\substack{
                           \langle r_1, r_2 \rangle\colon r_1 \text{ matches left of } c \\
                           \hspace*{2.5em}\wedge\ r_2 \text{ matches right of } c}}}\ \langle r_1, r_2 \rangle \\
-              \cmidrule{2-5}
-              & k & \state \tospec c & \begin{aligned} &x = v,\\[0pt] &rr = \langle r_1, r_2 \rangle \end{aligned} &
+              \cmidrule{3-5}
+              & & k & \begin{aligned} &x = v,\\[0pt] &rr = \langle r_1, r_2 \rangle \end{aligned} &
                   \begin{aligned}
                       &\state \tospec j \vee j - |\vec{c}| - 1 \quad\text{ where } \\
                       &\quad \vec{c} \text{ are the matches of } \langle r_1, r_2 \rangle \text{ in } v, \\
@@ -47,9 +47,55 @@
             \draw[decorate, decoration={brace, mirror}, transform canvas={yshift=-0.3em}]
                 (pic cs:mark:b:RR) -- (pic cs:mark:e:RR) node[midway, below] {$rr$};
         \end{tikzpicture}
-        \todoinline{Witness functions for FlashExtract and the standard library of PROSE.}
         \caption{Witness functions for various FlashFill operators.}
         \label{tbl:wfs:flashfill}
+    \end{fullpage}
+\end{sidewaystable}
+
+\begin{sidewaystable}[p!]
+    \begin{fullpage}
+        \centering
+        % \uwsinglespace
+        \small
+        \begin{tabu}{lX[-1$l]X[-1$l]X[-1$l]X[-3$l]}
+            \toprule
+            \textbf{Operator} & \textbf{Input spec} & \textbf{Parameter} & \textbf{Prerequisites} & \textbf{Output
+            spec} \\
+            \midrule
+            \dslinline|Kth($xs$,\ $k$)| & \state \tospec w & xs & & \state \tospec [\dots, w, \dots] \\
+            \cmidrule{3-5}
+            & & k & xs = \vec{v} & \state \tospec \bigvee\limits_{v_j = w} j \\
+            \midrule
+            \dslinline|Pair(|$p_1$\dslinline|,\ |$p_2$\dslinline|)| & \state \tospec \langle v_1, v_2 \rangle & p_j & &
+                \state \tospec v_j \\
+            \midrule
+            \dslinline|Map($F$,\ $L$)| & \state \tospec \mathbf{?} \sqsupseteq \vec{\ell} \text{ as a prefix } & F &
+                L = \vec{v} & \state \tospec f \text{ s.t. } \bigwedge\limits_{i=1}^{|\vec{\ell}|} f(v_i) = \ell_i \\
+            \midrule
+            $\fun{x}\ b$ & \state \tospec f \text{ s.t. } f(v) = y & b & & \state[x \coloneq v] \tospec y \\
+            \midrule
+            \dslinline|Filter($P$,\ $L$)| & \state \tospec \mathbf{?} \sqsupseteq \vec{\ell} & L & &
+                \state \tospec \mathbf{?} \sqsupseteq \vec{\ell} \\
+            \cmidrule{3-5}
+            & & P & L = \vec{v} & \state \tospec f \text{ s.t. }
+                \bigwedge\limits_{i=1}^{|\vec{v}|} f(\ell_i) = \bigl[v_i \in \vec{\ell}\bigr] \\
+            \midrule
+            \dslinline|FilterInt($i$,\ $k$,\ $L$)| & \state \tospec \mathbf{?} \sqsupseteq \vec{\ell} & L & &
+                \state \tospec \mathbf{?} \sqsupseteq \vec{\ell} \\
+            \cmidrule{3-5}
+            & & i & L = \vec{v} & \state \tospec \text{ index of } \ell_1 \text{ in } \vec{v} \\
+            \cmidrule{3-5}
+            & & k & L = \vec{v} &
+                \begin{aligned}
+                    &\state \tospec \bigvee\limits_{d\;|\; g} d \quad\text{ where } \\
+                    &\quad g = \mathsf{gcd}\bigl(\Delta_1, \dots, \Delta_{|\vec{\ell}|-1}\bigr), \\
+                    &\quad \Delta_i = p_{i+1} - p_i, \\
+                    &\quad p_j \text{ is an index of } \ell_j \text{ in } \vec{v}
+                \end{aligned} \\
+            \bottomrule
+        \end{tabu}
+        \caption{Witness functions for various operators from the standard library of PROSE (\dslinline|std|).}
+        \label{tbl:wfs:prose}
     \end{fullpage}
 \end{sidewaystable}
 
