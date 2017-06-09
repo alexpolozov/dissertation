@@ -21,6 +21,7 @@ search~\cite{transit:protocols,magichaskeller} or constraint solving~\cite{quick
 
 \begin{table}[p!]
     \centering
+    \small
     \newcounter{casenum}
     \setcounter{casenum}{-1}
     \begin{tabular}{>{\refstepcounter{casenum}}llcccc}
@@ -28,39 +29,47 @@ search~\cite{transit:protocols,magichaskeller} or constraint solving~\cite{quick
         \textbf{Project} & \textbf{Domain} & \textbf{Ded.} & \textbf{Impl.} & $\bm{\constraint}$ & $\bm{\spec'}$ \\
         \midrule
         \citet{flashfill} & String transformation & \yesmark & \yesmark & = & = \\
-        \citet{flashextract} & Text extraction & \yesmark & \yesmark & $\sqsupset$ & $\sqsupset$ \\
-        \citet{flashnormalize} & Text normalization & \yesmark & \yesmark & = & soft \\
-        \citet{flashrelate} & Table normalization & \yesmark & \yesmark & = & = \\
-        \citet{vldb12:semantic} & Semantic text editing & \yesmark & \nomark & = & = \\
-        \citet{harris2011spreadsheet} & Table transformation & \yesmark & \nomark & = & = \\
-        \citet{singh2012synthesizing} & Number transformation & \yesmark & \nomark & = & = \\
-        \citet{andersen:procedural} & Algebra education & \yesmark & \nomark & trace & = \\
-        \citet{lau:smartedit} & Editor scripting & \yesmark & \nomark & trace & = \\
-        \citet{pldi15:swarat} & ADT transformation & \yesmark & \nomark & = & = \\
-        \citet{pldi15:osera} & ADT transformation & \yesmark & \nomark & = & = \\
-        \label{case:totaldc}\citet{miller:colorful} & Editor scripting & \yesmark & \nomark & = & = \\
-        \citet{transit:protocols} & Concurrent protocols & \nomark & \nomark & trace & N/A \\
-        \citet{magichaskeller} & Haskell programs & \nomark & \nomark & = & N/A \\
-        \label{case:total}\citet{quicksilver} & Relational queries & \nomark & \nomark & = & N/A \\
+        \citet{flashextract} & Text extraction &  &  & $\sqsupset$ & $\sqsupset$ \\
+        \citet{flashnormalize} & Text normalization &  &  & = & soft \\
+        \citet{flashrelate} & Table normalization &  &  & = & = \\
+        \label{case:totalreimpl}\citet{singh2012synthesizing} & Number transformation &  &  & = & = \\
         \midrule
-        \label{case:totalwithfw}\textsf{WebExtract} & Web data extraction & \yesmark & \yesmark & $\sqsupset$ &
-            $\sqsupset$ \\
+        \citet{vldb12:semantic} & Semantic text editing & \yesmark & \nomark & = & = \\
+        \citet{harris2011spreadsheet} & Table transformation &  &  & = & = \\
+        \citet{andersen:procedural} & Algebra education &  &  & trace & = \\
+        \citet{lau:smartedit} & Editor scripting &  &  & trace & = \\
+        \citet{pldi15:swarat} & ADT transformation &  &  & = & = \\
+        \citet{pldi15:osera} & ADT transformation &  &  & = & = \\
+        \label{case:totaldc}\citet{miller:colorful} & Editor scripting &  &  & = & = \\
+        \midrule
+        \citet{transit:protocols} & Concurrent protocols & \nomark & \nomark & trace & N/A \\
+        \citet{magichaskeller} & Haskell programs &  &  & = & N/A \\
+        \label{case:total}\citet{quicksilver} & Relational queries &  &  & = & N/A \\
+        \midrule
+        \citet{raza2017automated} & Splitting of text into columns & \yesmark & \yesmark & = & = \\
+        \citet{refazer} & Software refactoring & & & = & = \\
+        \citet{gorinova2016end} & Reshaping of healthcare data & & & = & $\approx$ \\
+        \textsf{Transformation.JSON} & Transformation of JSON trees &  &  & = & $\sqsupset$ \\
+        \textsf{Extraction.JSON} & Extraction of data from JSON files &  &  & $\sqsupset$ & $\sqsupset$ \\
+        \textsf{Matching.Text} & Data profiling/clustering &  &  & --- & = \\
+        \label{case:totalwithnew}\textsf{Extraction.Web} & Web data extraction &  &  & $\sqsupset$ & $\sqsupset$ \\
         \bottomrule
     \end{tabular}
-    \todoinline{Add more case studies from 2016-2017.}
     \uwsinglespace
     \caption{Case studies of PROSE: prior works in inductive program synthesis.
         ``Ded.'' means ``Is it an instance of the deductive methodology?'',
         ``Impl.'' means ``Have we (re-)implemented it on top of PROSE?'', $\constraint$ is a top-level constraint kind,
-        $\spec'$ lists notable intermediate constraint kinds (for the deductive techniques only).}
+        $\spec'$ lists notable intermediate constraint kinds (for the deductive techniques only).
+        The bottommost section shows the new projects implemented on top of PROSE since its creation.}
     \label{tbl:prose:casestudies}
 \end{table}
 
-\begin{table}
+\begin{table}[t]
     \centering
     \begin{tabular}{lllll}
         \toprule
-        \multicolumn{1}{c}{\multirow{2}{*}{\textbf{Project}}} & \multicolumn{2}{c}{\textbf{LOC}} & \multicolumn{2}{c}{\textbf{Development time}} \\
+        \multicolumn{1}{c}{\multirow{2}{*}{\textbf{Project}}} & \multicolumn{2}{c}{\textbf{LOC}} &
+            \multicolumn{2}{c}{\textbf{Development time}} \\
         \cmidrule{2-3}  \cmidrule{4-5}
         & Original & PROSE & Original & PROSE \\
         \midrule
@@ -68,16 +77,25 @@ search~\cite{transit:protocols,magichaskeller} or constraint solving~\cite{quick
         \citet{flashextract} & 7K & 4K & 8 months & 1 month \\
         \citet{flashnormalize} & 17K & 2K & 7 months & 2 months \\
         \citet{flashrelate} & 5K & 2K & 8 months & 1 month \\
-        \textsf{WebExtract} & --- & 2.5K & --- & 1.5 months \\
+        \citet{singh2012synthesizing} & --- & 1K & --- & 2 months \\
+        \midrule
+        \citet{raza2017automated} & --- & 10K & --- & 2 months \\
+        \citet{refazer} & & 6K & & 3 months \\
+        \textsf{Transformation.JSON} & & 2K & & 1 month \\
+        \textsf{Extraction.JSON} & & 3K & & 1 month \\
+        \textsf{Matching.Text} & & 2K & & 3 months \\
+        \textsf{Extraction.Web} & & 2.5K & & 1.5 months \\
         \bottomrule
     \end{tabular}
-    \caption{Development data on the (re-)implemented projects.}
+    \caption{Development data on the (re-)implemented projects.
+        The cells marked with ``---'' either do not have an original implementation or we could not obtain historical
+    data on them.}
     \label{tbl:prose:reimplementation}
 \end{table}
 
-Our industrial collaborators reimplemented 4 existing systems
-and created a new system \textsf{WebExtract} for synthesis of CSS selectors for extraction of webpage data by example;
-it reuses portions of existing languages as external submodules.
+Our industrial collaborators reimplemented \ref*{case:totalreimpl} existing systems
+and created \pgfmathparse{int(\getrefnumber{case:totalwithnew}-\getrefnumber{case:total})}\pgfmathresult~new ones since
+PROSE was created in \citeyear{flashmeta}.
 We present data on these development efforts in \Cref{tbl:prose:reimplementation}.
 
 \paragraph{Q1: How motivated is our generalization of inductive specification?}
@@ -89,9 +107,9 @@ implemented using deductive search.
 
 \paragraph{Q2: How applicable is our generic operator library?}
 Most common operators across our case studies are string processing functions, due to the most popular domain being data
-manipulation (11/\ref*{case:totalwithfw} projects).
+manipulation (11/\ref*{case:totalwithnew} projects).
 Almost all projects include some version of learning conditional operators (equivalent to that of FlashFill).
-List processing operators (e.g. $\mathsf{Map}$, $\mathsf{Filter}$) appear in 9/\ref*{case:totalwithfw} projects, often
+List processing operators (e.g. $\mathsf{Map}$, $\mathsf{Filter}$) appear in 9/\ref*{case:totalwithnew} projects, often
 without explicit realization by the original authors (for example, the awkwardly defined \textsf{Loop} operator in
 FlashFill is actually a combination of \textsf{Concatenate} and \textsf{Map}).
 \citet{pldi15:swarat} define an extensive library of synthesis strategies for list-processing operators in the
@@ -106,8 +124,8 @@ The reason is that with PROSE, our collaborators did not concern themselves with
 algorithms, since they were implemented once and for all, as in \Cref{sec:prose:algorithm}.
 Instead, they focused only on domain-specific witness functions, for which design, implementation, and maintenance are
 much easier.
-Notably, in case of the FlashRelate~\cite{flashrelate} reimplementation and \textsf{WebExtract}, our collaborators did
-not have any experience in program synthesis.
+Notably, in case of the FlashRelate~\cite{flashrelate} reimplementation and \textsf{Extraction.Web}, our collaborators
+did not have any experience in program synthesis.
 
 The development time in \Cref{tbl:prose:reimplementation} includes the time required for an implementation to mature
 (i.e. cover the required use cases), which required multiple experiments with DSLs.
@@ -188,7 +206,6 @@ We share some anecdotes of PROSE simplifying synthesizer development below.
     This extension simply involved adding three \texttt{let} rules in the DSL, which (a) define the left boundary
     position using existing operators; (b) cut the suffix starting from that position; (c) define the right boundary in
     the suffix.
-    This extension was inspired by some practically useful tasks that FlashFill fails to handle.
     While such an extension in the original FlashFill implementation would consume a couple of weeks, in PROSE it
     took only a few minutes.
 \end{scenario}
@@ -211,9 +228,6 @@ We share some anecdotes of PROSE simplifying synthesizer development below.
     Moreover, the number of deduction steps is bounded by the tree depth.
 \end{scenario}
 
-\subsection{Experiments}
-\label{sec:prose:evaluation:experiments}
-
 \begin{figure}[p!]
     \centering
     \begin{tikzpicture}
@@ -235,26 +249,34 @@ We share some anecdotes of PROSE simplifying synthesizer development below.
     \label{fig:prose:evaluation:perf}
 \end{figure}
 
-\paragraph{Domain-specific tools}
+\subsection{Experiments}
+\label{sec:prose:evaluation:experiments}
+
+\paragraph{Performance \& Number of examples}
 \Cref{fig:prose:evaluation:perf} shows performance and the number of examples of our FlashFill and FlashExtract
 reimplementations on top of the PROSE framework.
 The overall performance is comparable to that of the original system, even though the implementations differ
 drastically.
 For example, the runtime of the original implementation of FlashExtract varies from 0.1 to 4 sec, with a median of 0.3
 sec~\cite{flashextract}.
-The new implementation (despite being more expressive and built on a general-purpose framework) has a runtime of
+The new implementation (despite being more expressive and built on a general framework) has a runtime of
 $0.5-3$x the original implementation, with a median of 0.6 sec.
 This performance is sufficient for the PROSE-based implementation to be successfully used in industry instead of the
 original one.
 
-\todoinline{VSA volume graph}
+\paragraph{VSA Volume}
+There is no good theoretical bound on the time of VSA clustering (the most time-consuming operation in the deductive
+search).
+However, it is evident that the output VSA volume is proportional to the clustering time.
+Thus, to evaluate it, we measured the VSA volume on our real-life benchmark suite.
+As \Cref{fig:prose:evaluation:volume} shows, even for large inputs it never exceeds $8000$ nodes (thus explaining
+efficient runtime), whereas VSA size (i.e. number of learned programs) may approach $10^{13}$.
 
-\paragraph{Generic tools}
-Comparing PROSE to general-purpose meta\hyp{}synthesizers proved challenging.
-The synthesis procedures of the most related projects (\textsc{Sketch}~\cite{sketch} and
-\textsc{Rosette}~\cite{rosette}) are currently defined only for DSLs based on SMT theories.
-In contrast, our case studies explore domains with rich semantics, such as regular expressions or webpage DOM.
-Even most recent extensions of the Z3 SMT solver to strings~\cite{z3str} lack expressiveness to model such DSLs.
-We believe that lowering the FlashExtract DSL, for instance, to theory of arrays would deem an unfair comparison because
-of huge size of the resulting encoding.
-Therefore we leave comparison of complementary meta-synthesis approaches to future work.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=1.0\linewidth]{figures/vsa-volume}
+    \uwsinglespace
+    \caption{The relationship between VSA volume and VSA size (i.e. number of programs) for the complete VSAs learned to
+    solve 6464 real-life FlashExtract scenarios.}
+    \label{fig:prose:evaluation:volume}
+\end{figure}

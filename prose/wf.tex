@@ -96,26 +96,30 @@ technologies.
     For instance, the FlashExtract DSL $\fedsl$ contains three \texttt{Map} instantiations: \texttt{LinesMap},
     \texttt{StartSeqMap}, and \texttt{EndSeqMap} (as defined in \Cref{fig:dsl:flashfill}).
     Their respective witness functions $\omega_L$ for the same \emph{prefix spec} $\state \tospec \mathbf{?} \sqsupseteq
-    \vec{v}$ are shown below:
+    \vec{v}$ are shown in \Cref{tbl:wfs:flashextract}.
+\end{example}
 
-    \vspace{0.5\baselineskip}
+\begin{table}[t]
     \begin{tabu}{l>{\hspace{0.1cm}}X[$l]}
         \toprule
         \textbf{Operator} & \textbf{Output spec} \\
         \midrule
         \texttt{LinesMap} & \begin{aligned}
-            &\state \tospec \mathbf{?} \sqsupseteq \bigl[ \ell_1, \dots, \ell_{|\vec{v}|} \bigr] \quad\text{ where } \\
-            &\quad \ell_i \text{ is a line of the input document } \state[doc] \text{ that contains the region } v_i
+          &\state \tospec \mathbf{?} \sqsupseteq \bigl[ \ell_1, \dots, \ell_{|\vec{v}|} \bigr] \quad\text{ where } \\
+          &\quad \ell_i \text{ is a line of the input document } \state[doc] \text{ that contains the region } v_i
         \end{aligned} \\
         \texttt{StartSeqMap} &
-            \state \tospec \mathbf{?} \sqsupseteq \bigl[p_1 \mid \langle p_1, p_2 \rangle \in \vec{v}\bigr] \\
+        \state \tospec \mathbf{?} \sqsupseteq \bigl[p_1 \mid \langle p_1, p_2 \rangle \in \vec{v}\bigr] \\
         \texttt{EndSeqMap} &
-            \state \tospec \mathbf{?} \sqsupseteq \bigl[p_2 \mid \langle p_1, p_2 \rangle \in \vec{v}\bigr] \\
+        \state \tospec \mathbf{?} \sqsupseteq \bigl[p_2 \mid \langle p_1, p_2 \rangle \in \vec{v}\bigr] \\
         \bottomrule
     \end{tabu}
-\end{example}
+    \caption{Witness functions $\omega_L(\spec) \mapsto \spec'$ for
+        the list parameter $L$ of various FlashExtract instantiations of the $\mathsf{Map}\left(F,\,L\right)$ operator,
+    where $\spec$ is a \emph{prefix spec} $\state \tospec \mathbf{?} \sqsupseteq \vec{v}$. }
+    \label{tbl:wfs:flashextract}
+\end{table}
 
-\paragraph{}
 Most witness functions are domain-specific w.r.t.  the operator that they characterize.
 However, once formulated in a module for a domain such as substring extraction, they can be reused by any DSL.
 In our example, witness functions for most operators in \Cref{tbl:wfs:prose} (namely, all except \texttt{Map}) do not
