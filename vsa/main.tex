@@ -237,7 +237,6 @@ However, in \Cref{sec:prose:evaluation:experiments} I show that these values usu
 \label{sec:vsa:language}
 
 \begin{figure}
-    \uwsinglespace
     \begin{minipage}[b]{0.42\textwidth}
         \begin{lstlisting}[language=dsl, gobble=12]
             int $position$[string $s$] $\coloneqq$
@@ -247,18 +246,18 @@ However, in \Cref{sec:prose:evaluation:experiments} I show that these values usu
             Regex $r$;
         \end{lstlisting}
     \end{minipage}
-    \hspace*{-5pt}
+    \hspace*{-2pt}
     \begin{minipage}[t]{0.577\textwidth}
         \small
         \begin{dot2tex}[options=--usepdflatex --figonly]
             \input{vsa/language-repr.dot}
         \end{dot2tex}
     \end{minipage}
-    \vspace*{-\baselineskip}
     \caption{
-        A VSA can be seen as an isomorphic representation for a CFG of some sub-language of the original DSL.
+        A VSA can be seen as an isomorphic representation for a context-free grammar of some sub-language of the
+        original DSL.
         \emph{Left:} An excerpt from the FlashFill DSL definition.
-        \emph{Right:} A sample VSA that represents a sub-language of the DSL on the top.}
+        \emph{Right:} A sample VSA that represents a sub-language of the DSL on the left.}
     \label{fig:vsa:language-repr}
 \end{figure}
 

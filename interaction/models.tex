@@ -166,7 +166,7 @@ alternatives from the VSA.
 The clarifying question for the user is based on the \emph{first discrepancy} between the outputs of the currently
 selected program $P$ and an alternative program $P'$.
 Such a discrepancy can have three possible manifestations:
-\begin{itemize}[nosep]
+\begin{itemize}
     \item The outputs of $P$ and $P'$ match until $P$ selects a region $r$, which does not intersect any selection of
         $P'$.
         This leads to the question ``Should $r$ be highlighted or not?''
@@ -220,15 +220,31 @@ The three files are the following:
 \newcommand{\BankListing}{Bank listing}
 \newcommand{\AmazonListing}{Amazon research}
 \newcommand{\HydrogensListing}{Bioinformatic log}
-\begin{description}[nosep]
-    \item[1. \BankListing.] List of bank addresses and capital grouped by state.
+\begin{description}
+    \item[1. \BankListing.] List of bank addresses and capital grouped by
+        state~(\Cref{fig:interactive:evaluation:banksample}).
         The postal code can be ambiguous.
-    \item[2. Amazon research.] The text of the search results on Amazon for the query ``chair''.
+    \item[2. Amazon research.] The text of the search results on Amazon for the query
+        ``chair'' (\Cref{fig:interactive:evaluation:amazonsample}).
         The data is visually structured as a list of records, but contains spacing and noise.
     \item[3. Bioinformatic log.] A log of numerical values obtained from five experiments, from bioinformatics
         research (\Cref{fig:interactive:evaluation:biosample,fig:interactive:evaluation:highlighting}).
         % A straightforward extraction misses one experiment.
 \end{description}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.8\columnwidth]{figures/bankinfo2}
+    \caption{\BankListing: Highlighting sample.}
+    \label{fig:interactive:evaluation:banksample}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.6\columnwidth]{figures/amazon}
+    \caption{Amazon research: Highlighting sample.}
+    \label{fig:interactive:evaluation:amazonsample}
+\end{figure}
 
 \begin{figure}[t]
     \centering
@@ -240,7 +256,7 @@ The three files are the following:
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.7\columnwidth]{figures/hydrogenhybrid}
-    \caption{Highlighting in the \InputTextView for obtaining~\Cref{fig:interactive:evaluation:biosample}.}
+    \caption{Highlighting in the \InputTextView that produces the data in \Cref{fig:interactive:evaluation:biosample}.}
     \label{fig:interactive:evaluation:highlighting}
 \end{figure}
 
@@ -312,7 +328,6 @@ We analyzed the data both from the logs collected by the UI instrumentation, and
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.6\columnwidth]{figures/error-plot1}
-    \uwsinglespace
     \caption{Distribution of error counts across the three environments in the user study of data wrangling in
         \FlashProg.
         Both \ConversationalClarification{} (\ConversationalClarificationInitials) and

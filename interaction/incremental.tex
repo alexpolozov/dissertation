@@ -9,8 +9,8 @@ All the information accumulated in the synthesis session is contained in $\spec'
 counterexamples, and more general constraints.
 Typically in PBE, the learner takes it all into account by solving a fresh synthesis problem, searching in the DSL
 $\dsl$ for programs that are consistent with all constraints in $\spec'$.
-As the size of $\spec'$ grows with each iteration, this synthesis problem becomes more complex, thereby slowing down the
-search process~\cite{bitvectors}.
+As the size of $\spec'$ grows with each iteration, this problem becomes more complex, thereby slowing down the
+search~\cite{bitvectors}.
 
 Our key observation here is that \emph{the program set $\vsa_i$ learned at iteration $i$ can be transformed into a new
     DSL $\dsl'$, which will become the search space for synthesis in iteration $i+1$ instead of~$\dsl$}.
@@ -46,6 +46,13 @@ Thus, all witness functions for $\dsl$ are still applicable for synthesis in $\d
 Moreover, $\dsl'$ is finite and its terminals are annotated with explicit sets of permitted values, which allows fast learning of constants
 for any spec type simply via set filtering.
 
+\subsection{Constraint Resolution}
+Deductive synthesis relies on existence of witness functions, which backpropagate constraints top-down through the
+grammar.
+Every witness function is defined for a particular \emph{constraint type}~$\constraint$ that it is able to decompose.
+While some generic operators allow efficient backpropagation procedures for common constraint types (see, e.g.
+\cite{pldi15:swarat,flashextract}), most witness functions are domain-specific.
+
 \begin{figure}[t]
     \centering
     \small
@@ -72,19 +79,10 @@ for any spec type simply via set filtering.
             \State \Return the context-free grammar $G = \langle V, \Sigma, R, \mathsf{sym}(\vsa)\rangle$
         \EndFunction
     \end{algorithmic}
-    \uwsinglespace
-    \vspace*{\baselineskip}
     \caption{An algorithm for translating a VSA $\vsa$ of programs in a DSL $\dsl$ into an isomorphic grammar for a
         sub-DSL $\dsl' \subset \dsl$.}
     \label{fig:vsa:incremental}
 \end{figure}
-
-\subsection{Constraint Resolution}
-Deductive synthesis relies on existence of witness functions, which backpropagate constraints top-down through the
-grammar.
-Every witness function is defined for a particular \emph{constraint type}~$\constraint$ that it is able to decompose.
-While some generic operators allow efficient backpropagation procedures for common constraint types (see, e.g.
-\cite{pldi15:swarat,flashextract}), most witness functions are domain-specific.
 
 We have identified a useful set of constraint types that occur in various PBE domains and often permit efficient witness
 functions.
@@ -109,9 +107,9 @@ incremental synthesis techniques required for each category.
             \item \emph{Datatype constraint}: ``output$\colon \tau$''.
                 Eliminates all top-level programs rooted at any type-incompatible DSL operators.
             \item \emph{Provenance constraint}: describes the desired construction method for some parts of the output.
-                For example, in FlashFill it may take form ``substring $[i:j]$ of the output example~$o_k$ is extracted from
-                location $\ell$ of
-                the corresponding input~$\state_k$'', or ``substring $[i:j]$ of the output example $o_k$ is a date
+                For example, in FlashFill it may take form ``substring $[i:j]$ of the output example~$o_k$ is extracted
+                from location $\ell$ of
+                the corresponding input~$\state_k$'',~or ``substring~$[i:j]$ of the output example $o_k$ is a date
                 value, formatted as
                 \stringliteral{YYYY-MM-DD}''.
                 Allows simple domain-specific elimination of invalid subprograms.
@@ -192,7 +190,8 @@ iteration) and all intermediate specs produced by witness functions (required to
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.99\linewidth]{figures/incremental-learning-performance}
-    \caption{Speedups obtained by the incremental synthesis algorithm vs. the non-incremental algorithm.
+    \caption{Speedups obtained by the incremental synthesis algorithm vs. the non-incremental algorithm when benchmarked
+        on 108 real-life FlashFill scenarios (i.e. a subset of our 531 scenarios that requires more than one example).
         Values higher above the $y=1$ line (where the runtimes are equal) are better.}
     \label{fig:interactive:incremental:speedup}
 \end{figure}
